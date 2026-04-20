@@ -33,7 +33,7 @@ public class PlanningAlgorithmService {
     public List<ScheduleResponseDTO> generatePlanning(LocalDate startDate, LocalDate endDate) {
         log.info("Génération du planning du {} au {}", startDate, endDate);
         
-        List<Employee> allActiveEmployees = employeeRepository.findByActiveTrueOrderByLastName_FirstName();
+        List<Employee> allActiveEmployees = employeeRepository.findByActiveTrueOrderByLastNameFirstName();
         List<NonWorkingDay> nonWorkingDays = nonWorkingDayRepository.findNonWorkingDaysInPeriod(startDate, endDate);
         Set<LocalDate> nonWorkingDates = nonWorkingDays.stream()
                 .filter(NonWorkingDay::isFullDay)
