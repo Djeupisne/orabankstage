@@ -72,7 +72,7 @@ public class PlanningAlgorithmService {
             }
             
             // TFJ : Lundi à Vendredi
-            if (dayOfWeek >= DayOfWeek.MONDAY && dayOfWeek <= DayOfWeek.FRIDAY) {
+            if (dayOfWeek.getValue() >= DayOfWeek.MONDAY.getValue() && dayOfWeek.getValue() <= DayOfWeek.FRIDAY.getValue()) {
                 Schedule schedule = assignTFJ(currentDate, employeesByRole, soloStatusMap, 
                                             lastAssignedDay, nonWorkingDays);
                 if (schedule != null) {
