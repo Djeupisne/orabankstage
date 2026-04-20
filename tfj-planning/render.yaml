@@ -9,11 +9,14 @@ services:
     rootDir: backend
     buildCommand: mvn clean package -DskipTests
     startCommand: java -jar target/tfj-planning-1.0.0.jar
+    healthCheckPath: /actuator/health
     envVars:
       - key: JAVA_VERSION
         value: 17
       - key: SPRING_PROFILES_ACTIVE
         value: prod
+      - key: PORT
+        value: 8080
       - key: DATABASE_URL
         fromDatabase:
           name: tfj-planning-db
@@ -28,6 +31,30 @@ services:
           property: password
       - key: JWT_SECRET
         generateValue: true
+      - key: CORS_ALLOWED_ORIGINS
+        fromService:
+          name: tfj-planning-frontend
+          type: staticSite
+          envVarKey: RENDER_EXTERNAL_URL
+
+  # Service Frontend Angular (Site Statique)
+  - type: static
+    name: tfj-planning-frontend
+    env: node
+    region: frankfurt
+    plan: starter
+    branch: main
+    rootDir: frontend
+    buildCommand: npm install && ng build --configuration production
+    publishDir: dist/tfj-planning-frontend
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+      - key: API_BASE_URL
+        fromService:
+          name: tfj-planning-backend
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
 
 databases:
   - name: tfj-planning-db

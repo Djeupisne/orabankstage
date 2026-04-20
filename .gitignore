@@ -1,49 +1,53 @@
 ```
-# Java/Maven
-target/
-*.class
-*.jar
-*.war
-*.ear
-*.zip
-*.tar
-*.tar.gz
-
-# Spring Boot
-!src/**/*
-!target/**
-target/
-
 # Dependencies
 node_modules/
-**/node_modules/
+venv/
+.venv/
+__pycache__/
+*.egg-info/
+dist-packages/
 
-# IDE
-.vscode/
-.idea/
-*.iml
-*.ipr
-*.iws
-
-# Environment
-.env
-.env.local
-.env.*
+# Build outputs
+dist/
+build/
+target/
+*.class
+*.pyc
+*.o
+*.obj
+*.so
+*.dll
+*.exe
 
 # Logs
 *.log
-logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# OS
+# Environment variables
+.env
+.env.local
+.env.*
+!tfj-planning/frontend/src/assets/env.js.template
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# OS generated files
 .DS_Store
 Thumbs.db
 
-# Build artifacts
-dist/
-build/
+# Coverage reports
 coverage/
 htmlcov/
-*.pyc
-__pycache__/
+.coverage
+
+# Temporary files
 *.tmp
+*.temp
 ```
