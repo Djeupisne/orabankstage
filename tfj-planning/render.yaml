@@ -1,4 +1,4 @@
-services:
+ervices:
   # Service Web pour le Backend Spring Boot
   - type: web
     name: tfj-planning-backend
@@ -10,9 +10,8 @@ services:
     buildCommand: mvn clean package -DskipTests
     startCommand: java -jar target/tfj-planning-1.0.0.jar
     healthCheckPath: /actuator/health
+    javaVersion: 17
     envVars:
-      - key: JAVA_VERSION
-        value: 17
       - key: SPRING_PROFILES_ACTIVE
         value: prod
       - key: PORT
@@ -31,11 +30,10 @@ services:
           property: password
       - key: JWT_SECRET
         generateValue: true
+      # On met une valeur par défaut "*" pour éviter le blocage au premier déploiement
+      # Vous pourrez la changer manuellement dans le dashboard après le déploiement
       - key: CORS_ALLOWED_ORIGINS
-        fromService:
-          name: tfj-planning-frontend
-          type: staticSite
-          envVarKey: RENDER_EXTERNAL_URL
+        value: "*"
 
   # Service Frontend Angular (Site Statique)
   - type: static
@@ -50,6 +48,7 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 18
+      # Cette variable sera résolue une fois le backend déployé
       - key: API_BASE_URL
         fromService:
           name: tfj-planning-backend
