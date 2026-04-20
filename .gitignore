@@ -3,8 +3,10 @@
 *.o
 *.obj
 *.out
-build/
-target/
+*.exe
+*.dll
+*.so
+*.a
 
 # Dependencies
 node_modules/
@@ -13,12 +15,14 @@ venv/
 __pycache__/
 .mypy_cache/
 .pytest_cache/
+target/
 .gradle/
 
 # Logs and temp files
 *.log
 *.tmp
 *.swp
+*.swo
 
 # Environment
 .env
@@ -28,8 +32,6 @@ __pycache__/
 # Editors
 .vscode/
 .idea/
-*.swp
-*.swo
 
 # System files
 .DS_Store
@@ -40,7 +42,7 @@ coverage/
 htmlcov/
 .coverage
 
-# Compressed files
+# Archives
 *.zip
 *.gz
 *.tar
@@ -63,3 +65,11 @@ htmlcov/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
+
+# Build directories
+build/
+dist/
+
+# Java-specific
+*.class
+target/
