@@ -2,11 +2,11 @@
 *.class
 *.o
 *.obj
-*.out
 *.exe
 *.dll
 *.so
 *.a
+*.out
 
 # Dependencies
 node_modules/
@@ -22,7 +22,6 @@ target/
 *.log
 *.tmp
 *.swp
-*.swo
 
 # Environment
 .env
@@ -33,16 +32,18 @@ target/
 .vscode/
 .idea/
 
-# System files
-.DS_Store
-Thumbs.db
-
-# Coverage
+# Build and distribution
+dist/
+build/
 coverage/
 htmlcov/
 .coverage
 
-# Archives
+# System files
+.DS_Store
+Thumbs.db
+
+# Compressed files
 *.zip
 *.gz
 *.tar
@@ -65,11 +66,3 @@ htmlcov/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
-
-# Build directories
-build/
-dist/
-
-# Java-specific
-*.class
-target/
