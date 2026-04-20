@@ -2,7 +2,7 @@ services:
   # Service Web pour le Backend Spring Boot
   - type: web
     name: tfj-planning-backend
-    env: java
+    env: docker
     region: frankfurt
     plan: starter
     branch: main
