@@ -1,0 +1,97 @@
+<div class="container">
+  <header>
+    <h1>{{ title }}</h1>
+    <p class="subtitle">Application de Planification des Travaux de Fin de Journée et Permanences</p>
+  </header>
+
+  <main>
+    <section class="planning-form">
+      <h2>Générer un Planning</h2>
+      
+      <div class="form-group">
+        <label for="startDate">Date de début :</label>
+        <input type="date" id="startDate" [(ngModel)]="startDate" required>
+      </div>
+
+      <div class="form-group">
+        <label for="endDate">Date de fin :</label>
+        <input type="date" id="endDate" [(ngModel)]="endDate" required>
+      </div>
+
+      <button (click)="generatePlanning()" [disabled]="loading" class="btn-primary">
+        {{ loading ? 'Génération en cours...' : 'Générer le Planning' }}
+      </button>
+
+      <div *ngIf="error" class="error-message">
+        {{ error }}
+      </div>
+    </section>
+
+    <section *ngIf="schedules.length > 0" class="planning-results">
+      <h2>Résultats du Planning</h2>
+      
+      <div class="filters">
+        <span class="badge badge-tfj">TFJ: Lundi-Vendredi</span>
+        <span class="badge badge-permanence">Permanence: Samedi</span>
+      </div>
+
+      <table class="planning-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Jour</th>
+            <th>Employé</th>
+            <th>Rôle</th>
+            <th>Service</th>
+            <th>Type</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let schedule of schedules" 
+              [class.solo-member]="schedule.isSoloInGroup">
+            <td>{{ schedule.date }}</td>
+            <td>{{ schedule.dayOfWeek | translateDay }}</td>
+            <td>
+              {{ schedule.employeeFullName }}
+              <span *ngIf="schedule.isSoloInGroup" class="solo-badge" title="Membre seul dans son groupe">*</span>
+            </td>
+            <td>{{ schedule.roleName }}</td>
+            <td>{{ schedule.serviceName }}</td>
+            <td>
+              <span [class.badge-tfj]="schedule.type === 'TFJ'" 
+                    [class.badge-permanence]="schedule.type === 'PERMANENCE'"
+                    class="badge">
+                {{ schedule.type }}
+              </span>
+            </td>
+            <td>
+              <span [class.confirmed]="schedule.isConfirmed" 
+                    [class.pending]="!schedule.isConfirmed"
+                    class="status">
+                {{ schedule.isConfirmed ? 'Confirmé' : 'En attente' }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="legend">
+        <h3>Légende :</h3>
+        <ul>
+          <li><span class="solo-badge">*</span> Membre seul dans son groupe (programmé uniquement le vendredi ou samedi)</li>
+          <li><strong>TFJ</strong> - Travaux de Fin de Journée (Lundi au Vendredi)</li>
+          <li><strong>Permanence</strong> - Permanence (Samedi)</li>
+        </ul>
+      </div>
+    </section>
+
+    <section *ngIf="schedules.length === 0 && !loading && startDate && endDate" class="no-results">
+      <p>Aucun planning généré pour cette période.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2024 Orabank Togo - DSI</p>
+  </footer>
+</div>

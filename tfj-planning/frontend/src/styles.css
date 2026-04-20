@@ -1,0 +1,285 @@
+/* Styles globaux */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f7fa;
+  color: #333;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Header */
+header {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  color: white;
+  padding: 30px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+/* Form */
+.planning-form {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.planning-form h2 {
+  color: #1e3c72;
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #555;
+}
+
+.form-group input[type="date"] {
+  width: 100%;
+  max-width: 300px;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.form-group input[type="date"]:focus {
+  outline: none;
+  border-color: #2a5298;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  color: white;
+  border: none;
+  padding: 14px 30px;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-weight: 600;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(30, 60, 114, 0.3);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error-message {
+  background-color: #fee;
+  color: #c00;
+  padding: 15px;
+  border-radius: 6px;
+  margin-top: 20px;
+  border-left: 4px solid #c00;
+}
+
+/* Results */
+.planning-results {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.planning-results h2 {
+  color: #1e3c72;
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+}
+
+.filters {
+  margin-bottom: 20px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-right: 10px;
+}
+
+.badge-tfj {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.badge-permanence {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+/* Table */
+.planning-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  overflow-x: auto;
+  display: block;
+}
+
+.planning-table thead {
+  display: table-header-group;
+}
+
+.planning-table tbody {
+  display: table-row-group;
+}
+
+.planning-table th,
+.planning-table td {
+  padding: 14px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.planning-table th {
+  background-color: #f8f9fa;
+  color: #1e3c72;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.planning-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+.solo-member {
+  background-color: #fff8e1;
+}
+
+.solo-badge {
+  background-color: #ff9800;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  margin-left: 8px;
+  font-weight: bold;
+}
+
+.status {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.confirmed {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.pending {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+/* Legend */
+.legend {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+}
+
+.legend h3 {
+  color: #1e3c72;
+  margin-bottom: 10px;
+}
+
+.legend ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.legend li {
+  margin-bottom: 8px;
+  padding-left: 20px;
+  position: relative;
+}
+
+.legend li:before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #2a5298;
+  font-weight: bold;
+}
+
+/* No results */
+.no-results {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 30px;
+  color: #666;
+  margin-top: 40px;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  header h1 {
+    font-size: 1.8rem;
+  }
+
+  .planning-table {
+    font-size: 0.85rem;
+  }
+
+  .planning-table th,
+  .planning-table td {
+    padding: 10px 8px;
+  }
+}
