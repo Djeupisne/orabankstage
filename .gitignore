@@ -1,2 +1,49 @@
-# Documentation files only - no build artifacts, dependencies, or temp files detected
-# No .gitignore rules needed for this change set
+```
+# Java/Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar
+*.tar.gz
+
+# Spring Boot
+!src/**/*
+!target/**
+target/
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+coverage/
+htmlcov/
+*.pyc
+__pycache__/
+*.tmp
+```

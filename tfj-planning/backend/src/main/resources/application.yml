@@ -1,0 +1,44 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: tfj-planning
+  
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/tfj_planning}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+# Logging
+logging:
+  level:
+    com.orabank.tfj: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+
+# API Documentation
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+# Security (basic configuration for demo - to be enhanced with JWT)
+security:
+  jwt:
+    secret: ${JWT_SECRET:your-secret-key-change-in-production-min-32-chars}
+    expiration: ${JWT_EXPIRATION:86400000}
