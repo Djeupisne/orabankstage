@@ -1,17 +1,19 @@
-```yaml
 # Compiled and build artifacts
 *.class
 *.o
 *.obj
 *.out
-*.exe
-*.dll
-*.so
-*.a
+build/
+target/
 
 # Dependencies
+node_modules/
+venv/
+.venv/
+__pycache__/
+.mypy_cache/
+.pytest_cache/
 .gradle/
-target/
 
 # Logs and temp files
 *.log
@@ -33,52 +35,10 @@ target/
 .DS_Store
 Thumbs.db
 
-# Coverage reports
+# Coverage
 coverage/
 htmlcov/
 .coverage
-
-# Python specific
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.so
-.PyInstaller/
-build/
-dist/
-*.egg-info/
-
-# Java specific
-*.jar
-*.war
-*.ear
-hs_err_pid*
-
-# Node.js specific
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Virtual environments
-venv/
-.venv/
-env/
-ENV/
-
-# Testing
-*.coverage
-coverage.xml
-nosetests.xml
-.junit-cache/
-
-# MyPy
-.mypy_cache/
-
-# PyTest
-.pytest_cache/
 
 # Compressed files
 *.zip
@@ -103,4 +63,3 @@ nosetests.xml
 *.tar.bz2
 *.tar.xz
 *.tar.zst
-```
