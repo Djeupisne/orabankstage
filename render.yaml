@@ -8,7 +8,6 @@ services:
     branch: main
     rootDir: backend
     buildCommand: mvn clean package -DskipTests
-    startCommand: java -jar target/tfj-planning-1.0.0.jar
     envVars:
       - key: JAVA_VERSION
         value: 17
