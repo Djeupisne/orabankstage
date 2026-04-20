@@ -6,9 +6,9 @@ spring:
     name: tfj-planning
   
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/tfj_planning}
-    username: ${DATABASE_USERNAME:postgres}
-    password: ${DATABASE_PASSWORD:postgres}
+    url: ${JDBC_DATABASE_URL:${DATABASE_URL:jdbc:postgresql://localhost:5432/tfj_planning}}
+    username: ${DATABASE_USERNAME:${DB_USER:postgres}}
+    password: ${DATABASE_PASSWORD:${DB_PASS:postgres}}
     driver-class-name: org.postgresql.Driver
   
   jpa:
