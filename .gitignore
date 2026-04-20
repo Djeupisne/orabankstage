@@ -1,43 +1,59 @@
-```
-# Configuration files
-*.yaml
-*.yml
+# Compiled and build artifacts
+*.pyc
+__pycache__/
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.out
+dist/
+build/
+target/
 
-# Logs and temporary files
-*.log
-*.tmp
-
-# Environment variables
+# Dependencies
+node_modules/
+venv/
+.venv/
 .env
 .env.local
 *.env.*
 
-# IDE and editor files
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Editors
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# Dependencies and build artifacts
-node_modules/
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.so
-*.dylib
-*.dll
-*.exe
-*.out
+# System files
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Python specific
+.mypy_cache/
+.pytest_cache/
+
+# Java/Gradle
+.gradle/
 *.class
-*.jar
-*.war
+
+# Compressed files
 *.zip
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tgz
 *.gz
+*.tar
+*.tgz
 *.bz2
 *.xz
 *.7z
@@ -52,24 +68,7 @@ __pycache__/
 *.Z
 *.lz
 *.lzo
-
-# Build and distribution directories
-dist/
-build/
-target/
-.coverage
-coverage/
-htmlcov/
-.mypy_cache/
-.pytest_cache/
-
-# Virtual environments
-venv/
-.venv/
-env/
-.ENV
-
-# System files
-.DS_Store
-Thumbs.db
-```
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
