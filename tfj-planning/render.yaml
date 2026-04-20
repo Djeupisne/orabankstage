@@ -1,4 +1,4 @@
-ervices:
+services:
   # Service Web pour le Backend Spring Boot
   - type: web
     name: tfj-planning-backend
