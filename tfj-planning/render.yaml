@@ -43,7 +43,7 @@ services:
     plan: starter
     branch: main
     rootDir: frontend
-    buildCommand: npm install && ng build --configuration production
+    buildCommand: npm install && npx ng build --configuration production
     publishDir: dist/tfj-planning-frontend
     envVars:
       - key: NODE_VERSION
