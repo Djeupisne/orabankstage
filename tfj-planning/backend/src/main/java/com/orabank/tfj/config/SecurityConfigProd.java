@@ -53,8 +53,10 @@ public class SecurityConfigProd {
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                 // Swagger et API docs désactivés en prod
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").denyAll()
-                // API ouverte en lecture seule pour le frontend
-                .requestMatchers("/api/**").permitAll()
+                // API ouverte en lecture seule pour le frontend - GET uniquement
+                .requestMatchers("GET", "/api/**").permitAll()
+                // Autres méthodes HTTP sur API nécessitent authentification
+                .requestMatchers("/api/**").authenticated()
                 // Tout le reste nécessite authentification
                 .anyRequest().authenticated()
             )
