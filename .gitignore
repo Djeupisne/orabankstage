@@ -1,31 +1,37 @@
 ```
-# Dependencies
-vendor/
+# Java/Maven build artifacts
+target/
+*.class
+*.jar
+*.war
+*.ear
 
-# Build artifacts and cache
-var/cache/
-!var/cache/.gitkeep
+# IDE specific files
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
 
-# Environment
+# Environment variables
 .env
-.env.dev
+.env.local
+*.env.*
 
 # Logs
 *.log
 
-# IDE
-.idea/
-.vscode/
+# Temporary files
+*.tmp
+*.swp
+*~
 
-# OS
+# OS generated files
 .DS_Store
 Thumbs.db
 
-# Symfony
-var/
-!var/.gitkeep
-!var/log/
-!var/log/.gitkeep
-!var/sessions/
-!var/sessions/.gitkeep
+# Maven specific
+.mvn/
+mvnw
+mvnw.cmd
 ```
