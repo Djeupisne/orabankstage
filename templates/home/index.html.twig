@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil - Gestion Planning</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        .header { background: #2c3e50; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 1.5rem; }
+        .header nav a { color: white; text-decoration: none; margin-left: 1rem; padding: 0.5rem 1rem; border-radius: 4px; }
+        .header nav a.btn-login { background: #3498db; }
+        .header nav a.btn-logout { background: #e74c3c; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .planning-section { background: white; border-radius: 8px; padding: 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .planning-section h2 { margin-bottom: 1rem; color: #2c3e50; }
+        .btn-download { background: #27ae60; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 4px; display: inline-block; margin-bottom: 1rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #34495e; color: white; }
+        tr:hover { background: #f8f9fa; }
+        .empty-message { text-align: center; padding: 2rem; color: #7f8c8d; }
+        .flash-messages { margin-bottom: 1rem; }
+        .flash-success { background: #d4edda; color: #155724; padding: 0.75rem; border-radius: 4px; margin-bottom: 0.5rem; }
+        .flash-error { background: #f8d7da; color: #721c24; padding: 0.75rem; border-radius: 4px; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Gestion Planning TFJ</h1>
+        <nav>
+            {% if app.user %}
+                <a href="{{ path('app_admin_dashboard') }}">Tableau de bord</a>
+                <a href="{{ path('app_logout') }}" class="btn-logout">Déconnexion</a>
+            {% else %}
+                <a href="{{ path('app_login') }}" class="btn-login">Connexion Admin</a>
+            {% endif %}
+        </nav>
+    </div>
+
+    <div class="container">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="flash-{{ label }}">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="planning-section">
+            <h2>📅 Planning Consultable</h2>
+            <a href="{{ path('app_planning_download') }}" class="btn-download">📥 Télécharger le planning (CSV)</a>
+            
+            {% if plannings|length > 0 %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Matin</th>
+                            <th>Après-midi</th>
+                            <th>Soir</th>
+                            <th>Commentaire</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for planning in plannings %}
+                            <tr>
+                                <td>{{ planning.date ? planning.date|date('d/m/Y') : '-' }}</td>
+                                <td>{{ planning.matin ?: '-' }}</td>
+                                <td>{{ planning.apresMidi ?: '-' }}</td>
+                                <td>{{ planning.soir ?: '-' }}</td>
+                                <td>{{ planning.commentaire ?: '-' }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="empty-message">Aucun planning disponible pour le moment.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
