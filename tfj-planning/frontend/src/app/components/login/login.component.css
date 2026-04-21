@@ -72,10 +72,24 @@
 .error-message {
   background-color: #fee;
   color: #c00;
-  padding: 12px;
+  padding: 12px 15px;
   border-radius: 6px;
   font-size: 14px;
   border-left: 4px solid #c00;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: shake 0.3s ease-in-out;
+}
+
+.error-icon {
+  flex-shrink: 0;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
 }
 
 .btn-login {

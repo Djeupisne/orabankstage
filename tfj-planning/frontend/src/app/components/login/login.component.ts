@@ -40,7 +40,19 @@ export class LoginComponent {
       },
       error: (err) => {
         this.loading = false;
-        this.errorMessage = err.message || 'Échec de la connexion. Veuillez vérifier vos identifiants.';
+        // Messages d'erreur plus précis selon le code HTTP
+        if (err.message.includes('401')) {
+          this.errorMessage = 'Identifiants incorrects. Veuillez vérifier votre identifiant et mot de passe.';
+        } else if (err.message.includes('403')) {
+          this.errorMessage = 'Accès refusé. Votre compte n\'a pas les permissions nécessaires pour accéder à cette interface.';
+        } else if (err.message.includes('404')) {
+          this.errorMessage = 'Le service d\'authentification est indisponible. Veuillez réessayer ultérieurement.';
+        } else if (err.message.includes('0')) {
+          this.errorMessage = 'Impossible de se connecter au serveur. Vérifiez votre connexion internet.';
+        } else {
+          this.errorMessage = err.message || 'Échec de la connexion. Veuillez vérifier vos identifiants.';
+        }
+        console.error('Erreur de connexion:', err);
       }
     });
   }
