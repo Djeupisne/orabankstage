@@ -1,68 +1,31 @@
 ```
-# Database
-var/data.db
+# Dependencies
+vendor/
+
+# Build artifacts and cache
+var/cache/
+!var/cache/.gitkeep
 
 # Environment
 .env
-.env.local
-*.env.*
+.env.dev
 
 # Logs
 *.log
 
-# Temporary files
-*.tmp
-*.swp
-
-# Editors
-.vscode/
+# IDE
 .idea/
+.vscode/
 
-# Dependencies
-vendor/
-node_modules/
-composer.lock
-
-# Build artifacts
-dist/
-build/
-target/
-*.o
-*.obj
-*.exe
-*.dll
-*.so
-*.a
-*.out
-
-# Python specific
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-.venv/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-coverage/
-htmlcov/
-.pytest_cache/
-.mypy_cache/
-
-# PHP specific
-*.phar
-*.pid
-
-# OS generated files
+# OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
+
+# Symfony
+var/
+!var/.gitkeep
+!var/log/
+!var/log/.gitkeep
+!var/sessions/
+!var/sessions/.gitkeep
 ```
