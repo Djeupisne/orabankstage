@@ -53,9 +53,16 @@ export interface DashboardStats {
 }
 
 export interface Schedule {
-  id?: number;
+  id: number;
+  employeeId: number;
+  employeeFullName: string;
+  employeeEmail: string;
+  roleName: string;
+  serviceName: string;
   date: string;
-  type: string;
-  employees: Employee[];
-  createdAt?: string;
+  dayOfWeek: string;
+  type: 'TFJ' | 'PERMANENCE';
+  notes: string;
+  isConfirmed: boolean;
+  isSoloInGroup: boolean;
 }
