@@ -92,9 +92,9 @@
               </td>
               <td>
                 <ul class="employee-list">
-                  <li *ngFor="let emp of schedule.employees">
-                    {{ emp.firstName }} {{ emp.lastName }}
-                    <span *ngIf="emp.serviceName" class="emp-service">({{ emp.serviceName }})</span>
+                  <li>
+                    {{ schedule.employeeFullName }}
+                    <span *ngIf="schedule.serviceName" class="emp-service">({{ schedule.serviceName }})</span>
                   </li>
                 </ul>
               </td>
