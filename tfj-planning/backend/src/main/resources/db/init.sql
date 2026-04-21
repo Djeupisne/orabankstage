@@ -88,9 +88,26 @@ INSERT INTO non_working_day (date, description, is_full_day, is_morning_only, is
     ('2026-12-24', 'Veille de Noël (après-midi)', false, true, false),
     ('2026-12-31', 'Veille du Nouvel An (après-midi)', false, true, false);
 
+-- 7. Exemples de congés pour tester la fonctionnalité
+-- Congé annuel pour Kofi AMENYONOR du 15 au 19 juin 2026
+INSERT INTO conge (employe_id, date_debut, date_fin, est_demi_journee_debut, est_demi_journee_fin, type_conge) VALUES 
+    ((SELECT id FROM employee WHERE email = 'k.amenyonor@orabank.tg'), 
+     '2026-06-15', '2026-06-19', false, false, 'CONGES_PAYES');
+
+-- Congé pour Folly GANOU du 22 au 26 juin 2026 (semaine suivante)
+INSERT INTO conge (employe_id, date_debut, date_fin, est_demi_journee_debut, est_demi_journee_fin, type_conge) VALUES 
+    ((SELECT id FROM employee WHERE email = 'f.ganou@orabank.tg'), 
+     '2026-06-22', '2026-06-26', false, false, 'CONGES_PAYES');
+
+-- Demi-journée de congé pour Ama TCHASSAN (matin du 8 juin 2026)
+INSERT INTO conge (employe_id, date_debut, date_fin, est_demi_journee_debut, est_demi_journee_fin, type_conge) VALUES 
+    ((SELECT id FROM employee WHERE email = 'a.tchassan@orabank.tg'), 
+     '2026-06-08', '2026-06-08', true, false, 'CONGES_PAYES');
+
 -- Vérification des données insérées
 SELECT 'Services créés: ' || COUNT(*) FROM service;
 SELECT 'Rôles créés: ' || COUNT(*) FROM role;
 SELECT 'Niveaux hiérarchiques créés: ' || COUNT(*) FROM hierarchical_level;
 SELECT 'Employés créés: ' || COUNT(*) FROM employee;
 SELECT 'Jours fériés créés: ' || COUNT(*) FROM non_working_day;
+SELECT 'Congés créés: ' || COUNT(*) FROM conge;
