@@ -1,0 +1,163 @@
+<div class="container">
+  <header>
+    <h1>Gestion des Absences Exceptionnelles</h1>
+    <p class="subtitle">Saisie des absences (maladie, imprévu) et réaffectation automatique du planning</p>
+  </header>
+
+  <main>
+    <!-- Formulaire de saisie -->
+    <section class="form-section">
+      <h2>Nouvelle absence exceptionnelle</h2>
+      
+      <form [formGroup]="formulaire" (ngSubmit)="soumettre()">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="employeeId">Employé *</label>
+            <select id="employeeId" formControlName="employeeId" [class.invalid]="f['employeeId'].invalid && f['employeeId'].touched">
+              <option value="">Sélectionnez un employé...</option>
+              <option *ngFor="let emp of employes" [value]="emp.id">
+                {{ emp.fullName }} - {{ emp.roleName || 'N/A' }}
+              </option>
+            </select>
+            <div *ngIf="f['employeeId'].invalid && f['employeeId'].touched" class="error-field">
+              Employé requis
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="motif">Motif *</label>
+            <select id="motif" formControlName="motif" [class.invalid]="f['motif'].invalid && f['motif'].touched">
+              <option *ngFor="let m of motifs" [value]="m.value">{{ m.label }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="dateDebut">Date de début *</label>
+            <input type="date" id="dateDebut" formControlName="dateDebut" 
+                   [class.invalid]="f['dateDebut'].invalid && f['dateDebut'].touched">
+            <div *ngIf="f['dateDebut'].invalid && f['dateDebut'].touched" class="error-field">
+              Date de début requise
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="dateFin">Date de fin *</label>
+            <input type="date" id="dateFin" formControlName="dateFin" 
+                   [class.invalid]="f['dateFin'].invalid && f['dateFin'].touched">
+            <div *ngIf="f['dateFin'].invalid && f['dateFin'].touched" class="error-field">
+              Date de fin requise
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group checkbox-group">
+            <label>
+              <input type="checkbox" formControlName="estDemiJourneeDebut">
+              Demi-journée de début
+            </label>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label>
+              <input type="checkbox" formControlName="estDemiJourneeFin">
+              Demi-journée de fin
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="commentaire">Commentaire</label>
+          <textarea id="commentaire" formControlName="commentaire" rows="3" 
+                    placeholder="Précisions sur l'absence..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="saisiPar">Saisi par</label>
+          <input type="text" id="saisiPar" formControlName="saisiPar" placeholder="Nom de l'administrateur">
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label>
+            <input type="checkbox" formControlName="estReaffectationAuto">
+            Réaffectation automatique du planning (recommandé)
+          </label>
+        </div>
+
+        <div class="button-group">
+          <button type="submit" [disabled]="loading || formulaire.invalid" class="btn-primary">
+            {{ loading ? 'Enregistrement...' : 'Enregistrer l\'absence' }}
+          </button>
+          <button type="button" (click)="formulaire.reset({motif: 'MALADIE', estDemiJourneeDebut: false, estDemiJourneeFin: false, saisiPar: 'Administrateur', estReaffectationAuto: true})" 
+                  [disabled]="loading" class="btn-secondary">
+            Réinitialiser
+          </button>
+        </div>
+      </form>
+
+      <div *ngIf="error" class="error-message">
+        <strong>Erreur :</strong> {{ error }}
+      </div>
+
+      <div *ngIf="successMessage" class="success-message">
+        <strong>Succès :</strong> {{ successMessage }}
+      </div>
+    </section>
+
+    <!-- Liste des absences récentes -->
+    <section *ngIf="absencesRecentes.length > 0" class="list-section">
+      <h2>Absences exceptionnelles (30 prochains jours)</h2>
+      
+      <table class="absences-table">
+        <thead>
+          <tr>
+            <th>Employé</th>
+            <th>Du</th>
+            <th>Au</th>
+            <th>Motif</th>
+            <th>Demi-journée</th>
+            <th>Réaffectation auto</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let absence of absencesRecentes">
+            <td>{{ absence.employeeFullName }}</td>
+            <td>{{ absence.dateDebut }}{{ absence.estDemiJourneeDebut ? ' (matin)' : '' }}</td>
+            <td>{{ absence.dateFin }}{{ absence.estDemiJourneeFin ? ' (matin)' : '' }}</td>
+            <td>
+              <span class="badge" [ngClass]="'badge-' + absence.motif.toLowerCase()">
+                {{ absence.motif }}
+              </span>
+            </td>
+            <td>
+              <span *ngIf="absence.estDemiJourneeDebut || absence.estDemiJourneeFin" class="info-badge">
+                {{ absence.estDemiJourneeDebut && absence.estDemiJourneeFin ? 'Début et fin' : (absence.estDemiJourneeDebut ? 'Début' : 'Fin') }}
+              </span>
+              <span *ngIf="!absence.estDemiJourneeDebut && !absence.estDemiJourneeFin">-</span>
+            </td>
+            <td>
+              <span *ngIf="absence.estReaffectationAuto" class="status-ok">Oui</span>
+              <span *ngIf="!absence.estReaffectationAuto" class="status-no">Non</span>
+            </td>
+            <td>
+              <button (click)="supprimerAbsence(absence.id!)" class="btn-delete" title="Supprimer">
+                🗑️
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section *ngIf="absencesRecentes.length === 0" class="no-results">
+      <p>Aucune absence exceptionnelle prévue pour les 30 prochains jours.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Orabank Togo - DSI</p>
+  </footer>
+</div>
