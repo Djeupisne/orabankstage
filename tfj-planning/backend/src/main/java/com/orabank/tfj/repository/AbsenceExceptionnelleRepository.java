@@ -24,7 +24,7 @@ public interface AbsenceExceptionnelleRepository extends JpaRepository<AbsenceEx
     /**
      * Trouve toutes les absences exceptionnelles actives dans une période
      */
-    @Query("SELECT ae FROM AbsenceExceptionnelle ae WHERE ae.dateFin >= :startDate AND ae.dateDebut <= :endDate")
+    @Query("SELECT ae FROM AbsenceExceptionnelle ae WHERE ae.actif = true AND ae.dateFin >= :startDate AND ae.dateDebut <= :endDate")
     List<AbsenceExceptionnelle> findAbsencesInPeriod(@Param("startDate") LocalDate startDate,
                                                       @Param("endDate") LocalDate endDate);
 

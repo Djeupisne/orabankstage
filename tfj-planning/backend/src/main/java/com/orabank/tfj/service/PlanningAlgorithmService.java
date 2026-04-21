@@ -38,7 +38,33 @@ public class PlanningAlgorithmService {
     public List<ScheduleResponseDTO> generatePlanning(LocalDate startDate, LocalDate endDate) {
         log.info("Génération du planning du {} au {}", startDate, endDate);
         
+        // Validation des dates - vérifier que la période est dans le futur
+        LocalDate today = LocalDate.now();
+        if (endDate.isBefore(today)) {
+            log.error("La date de fin ({}) est dans le passé. Génération annulée.", endDate);
+            throw new IllegalArgumentException("La période sélectionnée est dans le passé. Veuillez sélectionner une période future.");
+        }
+        
+        if (startDate.isBefore(today)) {
+            log.warn("La date de début ({}) est dans le passé. Ajustement à aujourd'hui.", startDate);
+            startDate = today;
+        }
+        
+        // Limiter la période maximale à 3 mois pour éviter les performances dégradées
+        LocalDate maxEndDate = startDate.plusMonths(3);
+        if (endDate.isAfter(maxEndDate)) {
+            log.warn("La période demandée est trop longue (> 3 mois). Limitation à 3 mois.");
+            endDate = maxEndDate;
+        }
+        
         List<Employee> allActiveEmployees = employeeRepository.findByActiveTrueOrderByLastNameFirstName();
+        
+        // Vérifier qu'il y a des employés actifs
+        if (allActiveEmployees.isEmpty()) {
+            log.error("Aucun employé actif trouvé dans la base de données");
+            throw new IllegalStateException("Aucun employé actif disponible pour générer le planning");
+        }
+        
         List<NonWorkingDay> nonWorkingDays = nonWorkingDayRepository.findNonWorkingDaysInPeriod(startDate, endDate);
         Set<LocalDate> nonWorkingDates = nonWorkingDays.stream()
                 .filter(NonWorkingDay::isFullDay)
@@ -102,6 +128,9 @@ public class PlanningAlgorithmService {
         // Suivi de la dernière affectation par employé pour la rotation
         Map<Long, DayOfWeek> lastAssignedDay = new HashMap<>();
         
+        int totalDaysToPlan = 0;
+        int daysWithAssignments = 0;
+        
         while (!currentDate.isAfter(endDate)) {
             DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
             
@@ -113,24 +142,34 @@ public class PlanningAlgorithmService {
             
             // TFJ : Lundi à Vendredi
             if (dayOfWeek.getValue() >= DayOfWeek.MONDAY.getValue() && dayOfWeek.getValue() <= DayOfWeek.FRIDAY.getValue()) {
+                totalDaysToPlan++;
                 Schedule schedule = assignTFJ(currentDate, nonManagerEmployeesByRole, managerEmployeesByRole, 
                                             soloStatusMap, lastAssignedDay, nonWorkingDays, congesByEmployee, absencesByEmployee);
                 if (schedule != null) {
                     generatedSchedules.add(schedule);
+                    daysWithAssignments++;
+                } else {
+                    log.warn("Aucun employé trouvé pour TFJ le {} (jour: {})", currentDate, dayOfWeek);
                 }
             }
             // Permanence : Samedi
             else if (dayOfWeek == DayOfWeek.SATURDAY) {
+                totalDaysToPlan++;
                 Schedule schedule = assignPermanence(currentDate, nonManagerEmployeesByRole, managerEmployeesByRole,
                                                      soloStatusMap, lastAssignedDay, nonWorkingDays, congesByEmployee, absencesByEmployee);
                 if (schedule != null) {
                     generatedSchedules.add(schedule);
+                    daysWithAssignments++;
+                } else {
+                    log.warn("Aucun employé trouvé pour permanence le {} (samedi)", currentDate);
                 }
             }
             // Dimanche : pas de planification
             
             currentDate = currentDate.plusDays(1);
         }
+        
+        log.info("Génération terminée : {} jours planifiables, {} affectations créées", totalDaysToPlan, daysWithAssignments);
         
         return generatedSchedules.stream()
                 .map(this::convertToResponseDTO)
