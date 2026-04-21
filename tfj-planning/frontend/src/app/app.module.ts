@@ -1,7 +1,7 @@
-import { bootstrapApplication } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { provideRouter } from '@angular/router';
-import { Routes } from '@angular/router';
+import { provideRouter, Routes } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { LoginComponent } from './components/login/login.component';
@@ -21,11 +21,21 @@ const routes: Routes = [
   { path: '**', redirectTo: '/home' }
 ];
 
-bootstrapApplication(AppComponent, {
+@NgModule({
+  declarations: [],
+  imports: [
+    BrowserModule,
+    AppComponent,
+    LoginComponent,
+    HomeComponent,
+    DashboardComponent
+  ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),
     provideRouter(routes),
     AuthGuard,
     AdminGuard
-  ]
-}).catch(err => console.error(err));
+  ],
+  bootstrap: []
+})
+export class AppModule {}
