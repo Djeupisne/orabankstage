@@ -1,15 +1,11 @@
-```
 # Compiled and build artifacts
 *.class
 *.o
 *.obj
-*.exe
+*.out
 *.dll
 *.so
 *.a
-*.out
-target/
-build/
 
 # Dependencies
 node_modules/
@@ -18,15 +14,13 @@ venv/
 __pycache__/
 .mypy_cache/
 .pytest_cache/
+target/
 .gradle/
-julia-*/
-zig*/
 
 # Logs and temp files
 *.log
 *.tmp
 *.swp
-*.swo
 
 # Environment
 .env
@@ -36,8 +30,15 @@ zig*/
 # Editors
 .vscode/
 .idea/
+*.swp
+*.swo
 
-# System files
+# Build directories
+build/
+dist/
+out/
+
+# OS specific
 .DS_Store
 Thumbs.db
 
@@ -46,27 +47,8 @@ coverage/
 htmlcov/
 .coverage
 
-# Compressed files
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
-```
+# Java specific
+*.jar
+*.war
+*.ear
+!tfj-planning/backend/src/main/java/com/orabank/tfj/config/SecurityConfigProd.java
