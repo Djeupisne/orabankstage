@@ -46,27 +46,19 @@ public class SecurityConfigProd {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/api/**", "/actuator/**")
-                .disable()
-            )
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 // Endpoints publics pour le monitoring
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                 // Swagger et API docs désactivés en prod
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").denyAll()
-                // API requiert authentification
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/**").hasAnyRole("USER", "ADMIN")
+                // API ouverte en lecture seule pour le frontend
+                .requestMatchers("/api/**").permitAll()
                 // Tout le reste nécessite authentification
                 .anyRequest().authenticated()
             )
-            .httpBasic(basic -> basic
-                .realmName("TFJ Planning Production")
-            )
-            .formLogin(form -> form.disable())
-            .logout(logout -> logout.disable())
-            .anonymous(anonymous -> anonymous.disable());
+            .httpBasic(basic -> basic.disable())
+            .anonymous(Customizer.withDefaults());
         
         return http.build();
     }
