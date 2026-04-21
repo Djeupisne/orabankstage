@@ -114,15 +114,17 @@ public class SecurityConfigProd {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // En production, restreindre aux domaines autorisés
+        // En production, inclure explicitement le domaine Render du frontend
         String allowedOrigins = System.getenv("CORS_ALLOWED_ORIGINS");
         if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
             configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
         } else {
-            // Valeur par défaut sécurisée (à adapter selon votre domaine)
+            // Valeurs par défaut incluant les domaines Render
             configuration.setAllowedOrigins(Arrays.asList(
-                "https://votre-domaine.com",
-                "https://www.votre-domaine.com"
+                "https://tfj-planning-frontend.onrender.com",
+                "https://tfj-planning-backend.onrender.com",
+                "http://localhost:3000",
+                "http://localhost:8080"
             ));
         }
         
@@ -144,7 +146,7 @@ public class SecurityConfigProd {
         configuration.setMaxAge(3600L);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", configuration);
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }
