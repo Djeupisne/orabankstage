@@ -26,8 +26,29 @@ public class AbsenceExceptionnelle {
     @Column(name = "date_fin", nullable = false)
     private LocalDate dateFin;
 
-    @Column(name = "raison", length = 500)
-    private String raison;
+    @Column(name = "est_demi_journee_debut", nullable = false)
+    @Builder.Default
+    private Boolean estDemiJourneeDebut = false;
+
+    @Column(name = "est_demi_journee_fin", nullable = false)
+    @Builder.Default
+    private Boolean estDemiJourneeFin = false;
+
+    @Column(name = "motif", length = 100)
+    private String motif;
+
+    @Column(name = "commentaire", length = 500)
+    private String commentaire;
+
+    @Column(name = "saisi_par", length = 100)
+    private String saisiPar;
+
+    @Column(name = "date_saisie")
+    private LocalDate dateSaisie;
+
+    @Column(name = "est_reaffectation_auto", nullable = false)
+    @Builder.Default
+    private Boolean estReaffectationAuto = false;
 
     @Column(name = "actif", nullable = false)
     @Builder.Default
