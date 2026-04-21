@@ -31,4 +31,9 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     
     @Query("SELECT s FROM Schedule s WHERE s.date = :date")
     Optional<Schedule> findByDate(@Param("date") LocalDate date);
+    
+    /**
+     * Trouve les schedules d'un employé dans une période (sans ordre)
+     */
+    List<Schedule> findByEmployeeIdAndDateBetween(Long employeeId, LocalDate startDate, LocalDate endDate);
 }
