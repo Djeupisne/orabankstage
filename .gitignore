@@ -1,51 +1,41 @@
 ```
-# Dependencies
-node_modules/
-.mvn/
+# Compiled and build artifacts
+*.class
+*.o
+*.obj
+*.out
+build/
 target/
 
-# Java compiled files
-*.class
-*.jar
-*.war
-*.ear
-
-# Python (if any Python components exist)
+# Dependencies
+.gradle/
+.mypy_cache/
+.pytest_cache/
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-.venv/
+node_modules/
 venv/
+.venv/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# Environment
 .env
 .env.local
 *.env.*
 
-# Frontend build artifacts
-dist/
-build/
-*.min.js
-*.min.css
-
-# IDE files
+# Editors
 .vscode/
 .idea/
-*.swp
-*.swo
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
 
 # Coverage
 coverage/
 htmlcov/
 .coverage
 
-# Temporary files
-*.tmp
-*.temp
+# System files
+.DS_Store
+Thumbs.db
 ```

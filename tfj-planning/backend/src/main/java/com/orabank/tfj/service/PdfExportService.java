@@ -50,12 +50,12 @@ public class PdfExportService {
 
             // Regrouper par date
             Map<LocalDate, List<ScheduleResponseDTO>> byDate = schedules.stream()
-                .collect(Collectors.groupingBy(ScheduleResponseDTO::date));
+                .collect(Collectors.groupingBy(ScheduleResponseDTO::getDate));
 
             // Créer le tableau
             float[] columnWidths = {1, 3, 3, 4, 2};
             Table table = new Table(columnWidths);
-            table.setWidthPercent(100);
+            table.setWidth(100f);
 
             // En-têtes
             String[] headers = {"N°", "Date", "Type", "Employés", "Statut"};
@@ -74,12 +74,10 @@ public class PdfExportService {
                 for (ScheduleResponseDTO schedule : daySchedules) {
                     table.addCell(new Cell().add(new Paragraph(String.valueOf(rowNum++))).setTextAlignment(TextAlignment.CENTER));
                     table.addCell(new Cell().add(new Paragraph(date.format(formatter))));
-                    table.addCell(new Cell().add(new Paragraph(schedule.type())));
+                    table.addCell(new Cell().add(new Paragraph(schedule.getType() != null ? schedule.getType().name() : "")));
                     
-                    String employees = schedule.employees().stream()
-                        .map(e -> e.firstName() + " " + e.lastName())
-                        .collect(Collectors.joining(", "));
-                    table.addCell(new Cell().add(new Paragraph(employees)));
+                    String employees = schedule.getEmployeeFullName();
+                    table.addCell(new Cell().add(new Paragraph(employees != null ? employees : "")));
                     
                     table.addCell(new Cell().add(new Paragraph("Planifié"))
                         .setTextAlignment(TextAlignment.CENTER));

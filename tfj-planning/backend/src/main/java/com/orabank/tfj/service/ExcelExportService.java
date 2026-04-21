@@ -79,7 +79,7 @@ public class ExcelExportService {
 
             // Regrouper par date
             Map<LocalDate, List<ScheduleResponseDTO>> byDate = schedules.stream()
-                .collect(Collectors.groupingBy(ScheduleResponseDTO::date));
+                .collect(Collectors.groupingBy(ScheduleResponseDTO::getDate));
 
             // Données
             int rowNum = 4;
@@ -99,14 +99,12 @@ public class ExcelExportService {
                     dateCell.setCellStyle(cellStyle);
 
                     Cell typeCell = row.createCell(2);
-                    typeCell.setCellValue(schedule.type());
+                    typeCell.setCellValue(schedule.getType() != null ? schedule.getType().name() : "");
                     typeCell.setCellStyle(cellStyle);
 
-                    String employees = schedule.employees().stream()
-                        .map(e -> e.firstName() + " " + e.lastName())
-                        .collect(Collectors.joining(", "));
+                    String employees = schedule.getEmployeeFullName();
                     Cell empCell = row.createCell(3);
-                    empCell.setCellValue(employees);
+                    empCell.setCellValue(employees != null ? employees : "");
                     empCell.setCellStyle(cellStyle);
 
                     Cell statusCell = row.createCell(4);
