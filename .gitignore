@@ -1,1 +1,22 @@
-Nothing should be ignored in this case, as only a Java source file was modified and no build artifacts, dependencies, or temporary files were detected in the changes.
+```
+# Dependencies
+vendor/
+
+# Symfony cache
+var/cache/
+
+# Environment
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+```
