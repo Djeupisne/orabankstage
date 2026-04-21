@@ -180,12 +180,12 @@ public class AbsenceExceptionnelleService {
                 .employeeFullName(absence.getEmployee().getFullName())
                 .dateDebut(absence.getDateDebut())
                 .dateFin(absence.getDateFin())
-                .estDemiJourneeDebut(absence.isEstDemiJourneeDebut())
-                .estDemiJourneeFin(absence.isEstDemiJourneeFin())
+                .estDemiJourneeDebut(absence.getEstDemiJourneeDebut())
+                .estDemiJourneeFin(absence.getEstDemiJourneeFin())
                 .motif(absence.getMotif())
                 .commentaire(absence.getCommentaire())
                 .saisiPar(absence.getSaisiPar())
-                .estReaffectationAuto(absence.isEstReaffectationAuto())
+                .estReaffectationAuto(absence.getEstReaffectationAuto())
                 .build();
     }
 }
