@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface HierarchicalLevelRepository extends JpaRepository<HierarchicalLevel, Long> {
     Optional<HierarchicalLevel> findByName(String name);
+    Optional<HierarchicalLevel> findByCode(String code);
     List<HierarchicalLevel> findAllByOrderByLevelOrderAsc();
     boolean existsByName(String name);
 }
