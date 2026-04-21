@@ -111,3 +111,18 @@ SELECT 'Niveaux hiérarchiques créés: ' || COUNT(*) FROM hierarchical_level;
 SELECT 'Employés créés: ' || COUNT(*) FROM employee;
 SELECT 'Jours fériés créés: ' || COUNT(*) FROM non_working_day;
 SELECT 'Congés créés: ' || COUNT(*) FROM conge;
+
+-- 8. Exemples d'absences exceptionnelles pour tester la fonctionnalité
+-- Absence maladie pour Esso PITANG du 10 au 12 juin 2026
+INSERT INTO absences_exceptionnelles (employe_id, date_debut, date_fin, est_demi_journee_debut, est_demi_journee_fin, motif, commentaire, saisi_par, date_saisie, est_reaffectation_auto) VALUES
+    ((SELECT id FROM employee WHERE email = 'e.pitang@orabank.tg'),
+     '2026-06-10', '2026-06-12', false, false, 'MALADIE', 
+     'Grippe avec fièvre', 'Admin DSI', CURRENT_DATE, true);
+
+-- Absence imprévue pour Akoussivi BANITOKE (demi-journée le 15 juin 2026)
+INSERT INTO absences_exceptionnelles (employe_id, date_debut, date_fin, est_demi_journee_debut, est_demi_journee_fin, motif, commentaire, saisi_par, date_saisie, est_reaffectation_auto) VALUES
+    ((SELECT id FROM employee WHERE email = 'a.banitoke@orabank.tg'),
+     '2026-06-15', '2026-06-15', true, false, 'IMPREVU', 
+     'Problème de transport', 'Admin DSI', CURRENT_DATE, true);
+
+SELECT 'Absences exceptionnelles créées: ' || COUNT(*) FROM absences_exceptionnelles;

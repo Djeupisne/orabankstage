@@ -11,6 +11,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Query("SELECT e FROM Employee e WHERE e.active = true ORDER BY e.lastName, e.firstName")
     List<Employee> findByActiveTrueOrderByLastNameFirstName();
     
+    @Query("SELECT e FROM Employee e ORDER BY e.lastName, e.firstName")
+    List<Employee> findAllByOrderByLastNameFirstName();
+    
     List<Employee> findByRoleIdAndActiveTrue(Long roleId);
     
     List<Employee> findByServiceIdAndActiveTrue(Long serviceId);
