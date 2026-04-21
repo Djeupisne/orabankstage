@@ -1,0 +1,210 @@
+<div class="dashboard-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>TFJ Planning</h2>
+      <p>Administration</p>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a 
+        [class.active]="activeTab === 'overview'" 
+        (click)="setActiveTab('overview')"
+        class="nav-item"
+      >
+        📊 Vue d'ensemble
+      </a>
+      <a 
+        [class.active]="activeTab === 'employees'" 
+        (click)="setActiveTab('employees')"
+        class="nav-item"
+      >
+        👥 Employés
+      </a>
+      <a 
+        [class.active]="activeTab === 'users'" 
+        (click)="setActiveTab('users')"
+        class="nav-item"
+      >
+        🔐 Utilisateurs
+      </a>
+      <a routerLink="/home" class="nav-item">
+        🏠 Accueil
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button (click)="logout()" class="btn-logout">
+        🚪 Déconnexion
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="top-bar">
+      <h1>Tableau de Bord Administrateur</h1>
+      <div class="user-info">
+        <span>{{ authService.getCurrentUser()?.fullName || authService.getCurrentUser()?.username }}</span>
+        <span class="badge">{{ authService.getCurrentUser()?.role }}</span>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- Overview Tab -->
+      <div *ngIf="activeTab === 'overview'" class="tab-content">
+        <h2>Statistiques Générales</h2>
+        
+        <div *ngIf="loading" class="loading">Chargement...</div>
+        
+        <div *ngIf="!loading && stats" class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+              <h3>{{ stats.totalEmployees }}</h3>
+              <p>Total Employés</p>
+            </div>
+          </div>
+
+          <div class="stat-card success">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+              <h3>{{ stats.activeEmployees }}</h3>
+              <p>Employés Actifs</p>
+            </div>
+          </div>
+
+          <div class="stat-card danger">
+            <div class="stat-icon">❌</div>
+            <div class="stat-info">
+              <h3>{{ stats.inactiveEmployees }}</h3>
+              <p>Employés Inactifs</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">🔐</div>
+            <div class="stat-info">
+              <h3>{{ stats.totalUsers }}</h3>
+              <p>Utilisateurs</p>
+            </div>
+          </div>
+
+          <div class="stat-card warning">
+            <div class="stat-icon">👨‍💼</div>
+            <div class="stat-info">
+              <h3>{{ stats.adminUsers }}</h3>
+              <p>Administrateurs</p>
+            </div>
+          </div>
+
+          <div class="stat-card info">
+            <div class="stat-icon">📋</div>
+            <div class="stat-info">
+              <h3>{{ stats.totalSchedules }}</h3>
+              <p>Plannings Générés</p>
+            </div>
+          </div>
+
+          <div class="stat-card primary">
+            <div class="stat-icon">📅</div>
+            <div class="stat-info">
+              <h3>{{ stats.tfjSchedules }}</h3>
+              <p>TFJ</p>
+            </div>
+          </div>
+
+          <div class="stat-card secondary">
+            <div class="stat-icon">🏦</div>
+            <div class="stat-info">
+              <h3>{{ stats.permanenceSchedules }}</h3>
+              <p>Permanences</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Employees Tab -->
+      <div *ngIf="activeTab === 'employees'" class="tab-content">
+        <h2>Gestion des Employés</h2>
+        
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nom complet</th>
+              <th>Email</th>
+              <th>Rôle</th>
+              <th>Service</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let emp of employees">
+              <td>{{ emp.fullName || (emp.firstName + ' ' + emp.lastName) }}</td>
+              <td>{{ emp.email }}</td>
+              <td>{{ emp.roleName || '-' }}</td>
+              <td>{{ emp.serviceName || '-' }}</td>
+              <td>
+                <span [class]="emp.active ? 'status-active' : 'status-inactive'">
+                  {{ emp.active ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+              <td>
+                <button 
+                  (click)="toggleEmployeeStatus(emp.id!, emp.active)" 
+                  class="btn-sm"
+                  [class.btn-success]="!emp.active"
+                  [class.btn-danger]="emp.active"
+                >
+                  {{ emp.active ? 'Désactiver' : 'Activer' }}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Users Tab -->
+      <div *ngIf="activeTab === 'users'" class="tab-content">
+        <h2>Gestion des Utilisateurs</h2>
+        
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Identifiant</th>
+              <th>Email</th>
+              <th>Rôle</th>
+              <th>Employé lié</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users">
+              <td>{{ user.username }}</td>
+              <td>{{ user.email }}</td>
+              <td>
+                <span class="badge">{{ user.role }}</span>
+              </td>
+              <td>{{ user.employeeFullName || '-' }}</td>
+              <td>
+                <span [class]="user.active ? 'status-active' : 'status-inactive'">
+                  {{ user.active ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+              <td>
+                <button 
+                  (click)="deleteUser(user.id!)" 
+                  class="btn-sm btn-danger"
+                >
+                  Supprimer
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>

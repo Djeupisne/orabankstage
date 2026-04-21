@@ -1,0 +1,133 @@
+<div class="home-container">
+  <!-- Header -->
+  <header class="home-header">
+    <div class="header-content">
+      <h1>TFJ Planning - Orabank Togo</h1>
+      <p>Consultation et génération des plannings de Travaux de Fin de Journée et Permanences</p>
+    </div>
+    
+    <div class="header-actions">
+      <a routerLink="/login" class="btn-login-header">
+        🔐 Connexion Admin
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="home-main">
+    <!-- Planning Generation Section -->
+    <section class="planning-section">
+      <h2>Générer un Planning</h2>
+      
+      <div class="date-form">
+        <div class="form-group">
+          <label for="startDate">Date de début</label>
+          <input 
+            type="date" 
+            id="startDate" 
+            [(ngModel)]="startDate"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="endDate">Date de fin</label>
+          <input 
+            type="date" 
+            id="endDate" 
+            [(ngModel)]="endDate"
+          />
+        </div>
+
+        <button (click)="generatePlanning()" class="btn-generate" [disabled]="loading">
+          {{ loading ? 'Génération en cours...' : '🔄 Générer le planning' }}
+        </button>
+
+        <button (click)="clearPlanning()" class="btn-clear">
+          🗑️ Effacer
+        </button>
+      </div>
+
+      <!-- Messages -->
+      <div *ngIf="error" class="message error">
+        ❌ {{ error }}
+      </div>
+
+      <div *ngIf="successMessage" class="message success">
+        ✅ {{ successMessage }}
+      </div>
+
+      <!-- Download Buttons -->
+      <div *ngIf="schedules.length > 0" class="download-buttons">
+        <button (click)="downloadPDF()" class="btn-download pdf">
+          📄 Télécharger PDF
+        </button>
+        <button (click)="downloadExcel()" class="btn-download excel">
+          📊 Télécharger Excel
+        </button>
+      </div>
+    </section>
+
+    <!-- Planning Display Section -->
+    <section *ngIf="showPlanningSection && schedules.length > 0" class="planning-display">
+      <h2>Planning Généré</h2>
+      
+      <div class="planning-table-container">
+        <table class="planning-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Jour</th>
+              <th>Type</th>
+              <th>Employés affectés</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let schedule of schedules">
+              <td>{{ schedule.date | date:'dd/MM/yyyy' }}</td>
+              <td>{{ schedule.date | translateDay }}</td>
+              <td>
+                <span [class]="schedule.type === 'TFJ' ? 'badge-tfj' : 'badge-permanence'">
+                  {{ schedule.type }}
+                </span>
+              </td>
+              <td>
+                <ul class="employee-list">
+                  <li *ngFor="let emp of schedule.employees">
+                    {{ emp.firstName }} {{ emp.lastName }}
+                    <span *ngIf="emp.serviceName" class="emp-service">({{ emp.serviceName }})</span>
+                  </li>
+                </ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Info Section -->
+    <section class="info-section">
+      <h2>À propos</h2>
+      <div class="info-cards">
+        <div class="info-card">
+          <h3>📅 TFJ (Travaux de Fin de Journée)</h3>
+          <p>Les TFJ sont planifiés du lundi au vendredi selon les règles métier établies.</p>
+        </div>
+        
+        <div class="info-card">
+          <h3>🏦 Permanences</h3>
+          <p>Les permanences sont organisées le samedi pour assurer la continuité du service.</p>
+        </div>
+        
+        <div class="info-card">
+          <h3>👥 Équipes</h3>
+          <p>Les affectations tiennent compte des rôles, services et niveaux hiérarchiques.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="home-footer">
+    <p>&copy; 2024 Orabank Togo - Application de Planning TFJ</p>
+  </footer>
+</div>
