@@ -1,22 +1,54 @@
 ```
+# Java/Maven specific
+target/
+*.class
+*.jar
+*.war
+*.ear
+
 # Dependencies
-vendor/
+lib/
+!lib/**/*
 
-# Symfony cache
-var/cache/
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
 
-# Environment
-.env.local
-.env.*.local
+# System
+.DS_Store
+Thumbs.db
 
 # Logs
 *.log
 
-# IDE
-.idea/
-.vscode/
+# Environment
+.env
+.env.local
+*.env.*
 
-# OS
-.DS_Store
-Thumbs.db
+# Coverage
+coverage/
+*.coverage
+.htmlcov/
+
+# Package manager
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python (if applicable)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+.env
+.pytest_cache/
+.mypy_cache/
 ```
