@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  # Service PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: tfj-postgres
+    environment:
+      POSTGRES_DB: tfj_planning
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/src/main/resources/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tfj-network
+
+  # Service Backend Spring Boot
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tfj-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DATABASE_URL: jdbc:postgresql://postgres:5432/tfj_planning
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+      JWT_SECRET: your-secret-key-change-in-production-min-32-chars-long-enough
+      PORT: 8080
+    ports:
+      - "8080:8080"
+    networks:
+      - tfj-network
+    restart: unless-stopped
+
+  # Service Frontend Angular
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tfj-frontend
+    depends_on:
+      - backend
+    environment:
+      API_URL: http://backend:8080
+    ports:
+      - "4200:80"
+    networks:
+      - tfj-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  tfj-network:
+    driver: bridge
