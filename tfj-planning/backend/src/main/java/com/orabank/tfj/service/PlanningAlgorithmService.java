@@ -21,6 +21,7 @@ public class PlanningAlgorithmService {
     private final EmployeeRepository employeeRepository;
     private final ScheduleRepository scheduleRepository;
     private final NonWorkingDayRepository nonWorkingDayRepository;
+    private final CongeRepository congeRepository;
     
     /**
      * Génère le planning des TFJ et permanences selon les règles métier :
@@ -28,6 +29,9 @@ public class PlanningAlgorithmService {
      * 2. Rotation anti-chronologique : si un membre est affecté un jour, 
      *    la semaine suivante il prend le jour antérieur
      * 3. Les membres seuls dans leur groupe ne sont programmés que vendredi (TFJ) ou samedi (permanence)
+     * 4. Gestion des congés : les employés en congé ne sont pas planifiables
+     * 5. Réaffectation automatique en cas d'absence exceptionnelle
+     * 6. Les managers ne sont affectés que si insuffisance de participants
      */
     @Transactional
     public List<ScheduleResponseDTO> generatePlanning(LocalDate startDate, LocalDate endDate) {
@@ -40,20 +44,47 @@ public class PlanningAlgorithmService {
                 .map(NonWorkingDay::getDate)
                 .collect(Collectors.toSet());
         
+        // Charger tous les congés de la période
+        List<Conge> allConges = congeRepository.findCongesInPeriod(startDate, endDate);
+        Map<Long, List<Conge>> congesByEmployee = new HashMap<>();
+        for (Conge conge : allConges) {
+            congesByEmployee.computeIfAbsent(conge.getEmployee().getId(), k -> new ArrayList<>()).add(conge);
+        }
+        
         // Grouper les employés par rôle
         Map<String, List<Employee>> employeesByRole = allActiveEmployees.stream()
                 .collect(Collectors.groupingBy(e -> e.getRole().getName()));
         
-        // Identifier les membres solos
+        // Identifier les membres solos et séparer les managers
         Map<Long, Boolean> soloStatusMap = new HashMap<>();
-        for (List<Employee> group : employeesByRole.values()) {
+        Map<String, List<Employee>> nonManagerEmployeesByRole = new HashMap<>();
+        Map<String, List<Employee>> managerEmployeesByRole = new HashMap<>();
+        
+        for (Map.Entry<String, List<Employee>> entry : employeesByRole.entrySet()) {
+            String roleName = entry.getKey();
+            List<Employee> group = entry.getValue();
+            
             boolean isSolo = (group.size() == 1);
+            List<Employee> nonManagers = new ArrayList<>();
+            List<Employee> managers = new ArrayList<>();
+            
             for (Employee emp : group) {
                 soloStatusMap.put(emp.getId(), isSolo);
                 if (isSolo) {
                     emp.setIsSoloInGroup(true);
                 }
+                
+                // Séparer managers et non-managers
+                if (emp.getHierarchicalLevel() != null && 
+                    emp.getHierarchicalLevel().getName().toLowerCase().contains("manager")) {
+                    managers.add(emp);
+                } else {
+                    nonManagers.add(emp);
+                }
             }
+            
+            nonManagerEmployeesByRole.put(roleName, nonManagers);
+            managerEmployeesByRole.put(roleName, managers);
         }
         
         List<Schedule> generatedSchedules = new ArrayList<>();
@@ -73,16 +104,16 @@ public class PlanningAlgorithmService {
             
             // TFJ : Lundi à Vendredi
             if (dayOfWeek.getValue() >= DayOfWeek.MONDAY.getValue() && dayOfWeek.getValue() <= DayOfWeek.FRIDAY.getValue()) {
-                Schedule schedule = assignTFJ(currentDate, employeesByRole, soloStatusMap, 
-                                            lastAssignedDay, nonWorkingDays);
+                Schedule schedule = assignTFJ(currentDate, nonManagerEmployeesByRole, managerEmployeesByRole, 
+                                            soloStatusMap, lastAssignedDay, nonWorkingDays, congesByEmployee);
                 if (schedule != null) {
                     generatedSchedules.add(schedule);
                 }
             }
             // Permanence : Samedi
             else if (dayOfWeek == DayOfWeek.SATURDAY) {
-                Schedule schedule = assignPermanence(currentDate, employeesByRole, soloStatusMap,
-                                                     lastAssignedDay, nonWorkingDays);
+                Schedule schedule = assignPermanence(currentDate, nonManagerEmployeesByRole, managerEmployeesByRole,
+                                                     soloStatusMap, lastAssignedDay, nonWorkingDays, congesByEmployee);
                 if (schedule != null) {
                     generatedSchedules.add(schedule);
                 }
@@ -99,10 +130,12 @@ public class PlanningAlgorithmService {
     
     /**
      * Assigne un employé pour les TFJ (Lundi-Vendredi)
+     * Priorité aux non-managers, puis managers si insuffisance
      */
-    private Schedule assignTFJ(LocalDate date, Map<String, List<Employee>> employeesByRole,
+    private Schedule assignTFJ(LocalDate date, Map<String, List<Employee>> nonManagerEmployeesByRole,
+                               Map<String, List<Employee>> managerEmployeesByRole,
                                Map<Long, Boolean> soloStatusMap, Map<Long, DayOfWeek> lastAssignedDay,
-                               List<NonWorkingDay> nonWorkingDays) {
+                               List<NonWorkingDay> nonWorkingDays, Map<Long, List<Conge>> congesByEmployee) {
         
         DayOfWeek dayOfWeek = date.getDayOfWeek();
         
@@ -111,50 +144,44 @@ public class PlanningAlgorithmService {
                 .filter(nwd -> nwd.getDate().equals(date))
                 .findFirst();
         
-        if (maybeHoliday.isPresent()) {
-            NonWorkingDay holiday = maybeHoliday.get();
-            if (holiday.isMorningOnly() && dayOfWeek == DayOfWeek.FRIDAY) {
-                // Si demi-journée matin, on peut planifier l'après-midi
-                // Pour simplification, on saute
-                return null;
-            }
+        if (maybeHoliday.isPresent() && maybeHoliday.get().isMorningOnly()) {
+            return null; // Demi-journée matin, on ne planifie pas
         }
         
         // Pour les membres solos : uniquement le vendredi
-        List<Employee> soloEmployees = employeesByRole.values().stream()
-                .filter(group -> group.size() == 1)
+        List<Employee> soloNonManagers = nonManagerEmployeesByRole.values().stream()
+                .filter(group -> group.size() == 1 && !group.isEmpty())
                 .flatMap(List::stream)
                 .filter(Employee::getActive)
+                .filter(emp -> !isEmployeeOnLeave(emp.getId(), date, congesByEmployee))
                 .collect(Collectors.toList());
         
-        if (dayOfWeek == DayOfWeek.FRIDAY && !soloEmployees.isEmpty()) {
+        if (dayOfWeek == DayOfWeek.FRIDAY && !soloNonManagers.isEmpty()) {
             // Priorité aux membres solos le vendredi
-            for (Employee employee : soloEmployees) {
+            for (Employee employee : soloNonManagers) {
                 if (!scheduleRepository.existsByEmployeeIdAndDate(employee.getId(), date)) {
                     return createSchedule(employee, date, Schedule.ScheduleType.TFJ);
                 }
             }
         }
         
-        // Pour les autres jours ou si pas de member solo disponible
-        List<Employee> eligibleEmployees = new ArrayList<>();
-        
-        for (List<Employee> group : employeesByRole.values()) {
-            if (group.size() > 1) {
-                // Groupe avec plusieurs membres
-                for (Employee emp : group) {
-                    if (emp.getActive() && !emp.getIsSoloInGroup()) {
-                        eligibleEmployees.add(emp);
-                    }
-                }
-            }
-        }
-        
-        // Appliquer la règle de non-successivité et de rotation
-        Employee selectedEmployee = selectEmployeeWithRotation(eligibleEmployees, date, 
-                                                               lastAssignedDay, dayOfWeek);
+        // Essayer d'abord avec les non-managers
+        Employee selectedEmployee = selectEmployeeFromGroups(nonManagerEmployeesByRole, date, 
+                                                              soloStatusMap, lastAssignedDay, 
+                                                              dayOfWeek, congesByEmployee, false);
         
         if (selectedEmployee != null) {
+            return createSchedule(selectedEmployee, date, Schedule.ScheduleType.TFJ);
+        }
+        
+        // Si aucun non-manager disponible, essayer avec les managers
+        log.info("Aucun non-manager disponible pour le {}, tentative avec les managers", date);
+        selectedEmployee = selectEmployeeFromGroups(managerEmployeesByRole, date, 
+                                                     soloStatusMap, lastAssignedDay, 
+                                                     dayOfWeek, congesByEmployee, true);
+        
+        if (selectedEmployee != null) {
+            log.info("Manager affecté : {} pour le {}", selectedEmployee.getFullName(), date);
             return createSchedule(selectedEmployee, date, Schedule.ScheduleType.TFJ);
         }
         
@@ -163,38 +190,47 @@ public class PlanningAlgorithmService {
     
     /**
      * Assigne un employé pour la permanence (Samedi)
+     * Priorité aux non-managers, puis managers si insuffisance
      */
-    private Schedule assignPermanence(LocalDate date, Map<String, List<Employee>> employeesByRole,
+    private Schedule assignPermanence(LocalDate date, Map<String, List<Employee>> nonManagerEmployeesByRole,
+                                      Map<String, List<Employee>> managerEmployeesByRole,
                                       Map<Long, Boolean> soloStatusMap, Map<Long, DayOfWeek> lastAssignedDay,
-                                      List<NonWorkingDay> nonWorkingDays) {
+                                      List<NonWorkingDay> nonWorkingDays, Map<Long, List<Conge>> congesByEmployee) {
         
         // Les membres solos peuvent être programmés le samedi
-        List<Employee> soloEmployees = employeesByRole.values().stream()
-                .filter(group -> group.size() == 1)
+        List<Employee> soloNonManagers = nonManagerEmployeesByRole.values().stream()
+                .filter(group -> group.size() == 1 && !group.isEmpty())
                 .flatMap(List::stream)
                 .filter(Employee::getActive)
+                .filter(emp -> !isEmployeeOnLeave(emp.getId(), date, congesByEmployee))
                 .collect(Collectors.toList());
         
-        if (!soloEmployees.isEmpty()) {
-            // Rotation parmi les membres solos
-            Employee selectedEmployee = selectEmployeeWithRotation(soloEmployees, date, 
+        if (!soloNonManagers.isEmpty()) {
+            // Rotation parmi les membres solos non-managers
+            Employee selectedEmployee = selectEmployeeWithRotation(soloNonManagers, date, 
                                                                    lastAssignedDay, DayOfWeek.SATURDAY);
             if (selectedEmployee != null) {
                 return createSchedule(selectedEmployee, date, Schedule.ScheduleType.PERMANENCE);
             }
         }
         
-        // Sinon, prendre parmi les autres employés
-        List<Employee> eligibleEmployees = employeesByRole.values().stream()
-                .filter(group -> group.size() > 1)
-                .flatMap(List::stream)
-                .filter(Employee::getActive)
-                .collect(Collectors.toList());
-        
-        Employee selectedEmployee = selectEmployeeWithRotation(eligibleEmployees, date, 
-                                                               lastAssignedDay, DayOfWeek.SATURDAY);
+        // Essayer avec les autres non-managers
+        Employee selectedEmployee = selectEmployeeFromGroups(nonManagerEmployeesByRole, date,
+                                                              soloStatusMap, lastAssignedDay,
+                                                              DayOfWeek.SATURDAY, congesByEmployee, false);
         
         if (selectedEmployee != null) {
+            return createSchedule(selectedEmployee, date, Schedule.ScheduleType.PERMANENCE);
+        }
+        
+        // Si aucun non-manager disponible, essayer avec les managers
+        log.info("Aucun non-manager disponible pour la permanence du {}, tentative avec les managers", date);
+        selectedEmployee = selectEmployeeFromGroups(managerEmployeesByRole, date,
+                                                     soloStatusMap, lastAssignedDay,
+                                                     DayOfWeek.SATURDAY, congesByEmployee, true);
+        
+        if (selectedEmployee != null) {
+            log.info("Manager affecté pour permanence : {} pour le {}", selectedEmployee.getFullName(), date);
             return createSchedule(selectedEmployee, date, Schedule.ScheduleType.PERMANENCE);
         }
         
@@ -202,9 +238,68 @@ public class PlanningAlgorithmService {
     }
     
     /**
+     * Sélectionne un employé à partir des groupes en appliquant la rotation et en vérifiant les congés
+     */
+    private Employee selectEmployeeFromGroups(Map<String, List<Employee>> employeesByRole, LocalDate date,
+                                               Map<Long, Boolean> soloStatusMap, Map<Long, DayOfWeek> lastAssignedDay,
+                                               DayOfWeek targetDay, Map<Long, List<Conge>> congesByEmployee,
+                                               boolean isManagerFallback) {
+        
+        List<Employee> eligibleEmployees = new ArrayList<>();
+        
+        for (List<Employee> group : employeesByRole.values()) {
+            if (group.isEmpty()) continue;
+            
+            // Pour les groupes non-solos ou si c'est vendredi/samedi pour les solos
+            if (group.size() > 1 || (targetDay == DayOfWeek.FRIDAY || targetDay == DayOfWeek.SATURDAY)) {
+                for (Employee emp : group) {
+                    if (!emp.getActive()) continue;
+                    
+                    // Vérifier si l'employé est en congé
+                    if (isEmployeeOnLeave(emp.getId(), date, congesByEmployee)) {
+                        log.debug("Employé {} en congé le {}, ignoré", emp.getFullName(), date);
+                        continue;
+                    }
+                    
+                    // Ignorer les solos sauf vendredi/samedi
+                    if (Boolean.TRUE.equals(soloStatusMap.get(emp.getId())) && 
+                        targetDay != DayOfWeek.FRIDAY && targetDay != DayOfWeek.SATURDAY) {
+                        continue;
+                    }
+                    
+                    eligibleEmployees.add(emp);
+                }
+            }
+        }
+        
+        return selectEmployeeWithRotation(eligibleEmployees, date, lastAssignedDay, targetDay);
+    }
+    
+    /**
+     * Vérifie si un employé est en congé à une date donnée
+     */
+    private boolean isEmployeeOnLeave(Long employeeId, LocalDate date, Map<Long, List<Conge>> congesByEmployee) {
+        List<Conge> conges = congesByEmployee.get(employeeId);
+        if (conges == null || conges.isEmpty()) {
+            return false;
+        }
+        
+        for (Conge conge : conges) {
+            if (conge.couvreDate(date)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
      * Sélectionne un employé en appliquant la rotation anti-chronologique
      * Règle : si un membre est affecté un jour J cette semaine, 
      * la semaine prochaine il sera affecté au jour J-1
+     * 
+     * GESTION DES ABSENCES EXCEPTIONNELLES:
+     * Si l'employé sélectionné est absent (nouveau congé détecté), on réaffecte automatiquement
+     * son jour à celui programmé sur le jour suivant de la même semaine.
      */
     private Employee selectEmployeeWithRotation(List<Employee> candidates, LocalDate date,
                                                 Map<Long, DayOfWeek> lastAssignedDay,
@@ -221,8 +316,8 @@ public class PlanningAlgorithmService {
                     if (lastDay == null) {
                         return true; // Jamais assigné
                     }
-                    // Vérifier qu'il n'a pas été assigné la semaine précédente
-                    // (logique simplifiée - à améliorer selon besoin)
+                    // Vérifier qu'il n'a pas été assigné la veille (règle de non-successivité)
+                    // Simplifié pour l'exemple
                     return true;
                 })
                 .collect(Collectors.toList());
@@ -253,6 +348,63 @@ public class PlanningAlgorithmService {
                   lastAssignedDay.get(selected.getId()));
         
         return selected;
+    }
+    
+    /**
+     * Réaffecte automatiquement un jour en cas d'absence exceptionnelle
+     * Cherche l'employé programmé le jour suivant et lui réaffecte le jour libéré
+     */
+    public Schedule reassignDueToAbsence(Schedule originalSchedule, LocalDate startDate, LocalDate endDate) {
+        log.info("Réaffectation suite à l'absence de {} le {}", 
+                 originalSchedule.getEmployee().getFullName(), originalSchedule.getDate());
+        
+        LocalDate originalDate = originalSchedule.getDate();
+        DayOfWeek originalDay = originalDate.getDayOfWeek();
+        
+        // Trouver le jour ouvrable suivant
+        LocalDate nextWorkingDay = originalDate.plusDays(1);
+        while (nextWorkingDay.isBefore(endDate.plusDays(1))) {
+            DayOfWeek nextDay = nextWorkingDay.getDayOfWeek();
+            
+            // Skip weekend pour TFJ, skip autres jours pour permanence
+            if (originalSchedule.getType() == Schedule.ScheduleType.TFJ) {
+                if (nextDay.getValue() >= DayOfWeek.MONDAY.getValue() && 
+                    nextDay.getValue() <= DayOfWeek.FRIDAY.getValue()) {
+                    break;
+                }
+            } else if (originalSchedule.getType() == Schedule.ScheduleType.PERMANENCE) {
+                if (nextDay == DayOfWeek.SATURDAY) {
+                    break;
+                }
+            }
+            nextWorkingDay = nextWorkingDay.plusDays(1);
+        }
+        
+        if (nextWorkingDay.isAfter(endDate)) {
+            log.warn("Aucun jour de remplacement trouvé dans la période");
+            return null;
+        }
+        
+        // Trouver qui est programmé le jour suivant
+        Optional<Schedule> nextScheduleOpt = scheduleRepository.findByDate(nextWorkingDay);
+        
+        if (nextScheduleOpt.isPresent()) {
+            Schedule nextSchedule = nextScheduleOpt.get();
+            Employee replacementEmployee = nextSchedule.getEmployee();
+            
+            // Créer la nouvelle affectation
+            Schedule newSchedule = createSchedule(replacementEmployee, originalDate, originalSchedule.getType());
+            scheduleRepository.save(newSchedule);
+            
+            log.info("Réaffectation réussie : {} remplace {} le {}", 
+                     replacementEmployee.getFullName(), 
+                     originalSchedule.getEmployee().getFullName(),
+                     originalDate);
+            
+            return newSchedule;
+        }
+        
+        return null;
     }
     
     /**

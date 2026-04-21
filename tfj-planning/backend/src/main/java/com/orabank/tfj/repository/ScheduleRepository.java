@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     
@@ -27,4 +28,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     boolean existsByEmployeeIdAndDate(@Param("employeeId") Long employeeId, @Param("date") LocalDate date);
     
     List<Schedule> findByDateAndType(LocalDate date, Schedule.ScheduleType type);
+    
+    @Query("SELECT s FROM Schedule s WHERE s.date = :date")
+    Optional<Schedule> findByDate(@Param("date") LocalDate date);
 }
