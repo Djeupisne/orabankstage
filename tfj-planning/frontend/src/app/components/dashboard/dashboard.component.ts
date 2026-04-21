@@ -190,7 +190,7 @@ export class DashboardComponent implements OnInit {
 
   downloadPDF(): void {
     if (!this.startDate || !this.endDate) {
-      this.planningError = 'Veuillez d\\'abord générer le planning';
+      this.planningError = "Veuillez d'abord générer le planning";
       return;
     }
     
@@ -200,7 +200,7 @@ export class DashboardComponent implements OnInit {
 
   downloadExcel(): void {
     if (!this.startDate || !this.endDate) {
-      this.planningError = 'Veuillez d\\'abord générer le planning';
+      this.planningError = "Veuillez d'abord générer le planning";
       return;
     }
     
