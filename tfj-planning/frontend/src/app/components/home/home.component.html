@@ -15,9 +15,56 @@
 
   <!-- Main Content -->
   <main class="home-main">
-    <!-- Planning Generation Section -->
-    <section class="planning-section">
-      <h2>Générer un Planning</h2>
+    <!-- Planning Display Section - Always visible for everyone when planning exists -->
+    <section *ngIf="showPlanningSection && schedules.length > 0" class="planning-display">
+      <h2>Planning Généré</h2>
+      
+      <div class="planning-table-container">
+        <table class="planning-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Jour</th>
+              <th>Type</th>
+              <th>Employés affectés</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let schedule of schedules">
+              <td>{{ schedule.date | date:'dd/MM/yyyy' }}</td>
+              <td>{{ schedule.date | translateDay }}</td>
+              <td>
+                <span [class]="schedule.type === 'TFJ' ? 'badge-tfj' : 'badge-permanence'">
+                  {{ schedule.type }}
+                </span>
+              </td>
+              <td>
+                <ul class="employee-list">
+                  <li>
+                    {{ schedule.employeeFullName }}
+                    <span *ngIf="schedule.serviceName" class="emp-service">({{ schedule.serviceName }})</span>
+                  </li>
+                </ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Download Buttons - Visible for everyone -->
+      <div class="download-buttons">
+        <button (click)="downloadPDF()" class="btn-download pdf">
+          📄 Télécharger PDF
+        </button>
+        <button (click)="downloadExcel()" class="btn-download excel">
+          📊 Télécharger Excel
+        </button>
+      </div>
+    </section>
+
+    <!-- Planning Generation Section - Only for Admin -->
+    <section *ngIf="isAdmin" class="planning-section">
+      <h2>Générer un Planning (Admin uniquement)</h2>
       
       <div class="date-form">
         <div class="form-group">
@@ -54,53 +101,6 @@
 
       <div *ngIf="successMessage" class="message success">
         ✅ {{ successMessage }}
-      </div>
-
-      <!-- Download Buttons -->
-      <div *ngIf="schedules.length > 0" class="download-buttons">
-        <button (click)="downloadPDF()" class="btn-download pdf">
-          📄 Télécharger PDF
-        </button>
-        <button (click)="downloadExcel()" class="btn-download excel">
-          📊 Télécharger Excel
-        </button>
-      </div>
-    </section>
-
-    <!-- Planning Display Section -->
-    <section *ngIf="showPlanningSection && schedules.length > 0" class="planning-display">
-      <h2>Planning Généré</h2>
-      
-      <div class="planning-table-container">
-        <table class="planning-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Jour</th>
-              <th>Type</th>
-              <th>Employés affectés</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let schedule of schedules">
-              <td>{{ schedule.date | date:'dd/MM/yyyy' }}</td>
-              <td>{{ schedule.date | translateDay }}</td>
-              <td>
-                <span [class]="schedule.type === 'TFJ' ? 'badge-tfj' : 'badge-permanence'">
-                  {{ schedule.type }}
-                </span>
-              </td>
-              <td>
-                <ul class="employee-list">
-                  <li>
-                    {{ schedule.employeeFullName }}
-                    <span *ngIf="schedule.serviceName" class="emp-service">({{ schedule.serviceName }})</span>
-                  </li>
-                </ul>
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </section>
 
