@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -49,7 +51,7 @@ public class SecurityConfigProd {
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                 // Swagger et API docs désactivés en prod
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").denyAll()
-                // Endpoints d'authentification publics (login)
+                // Endpoints d'authentification publics (login) - DOIT ETRE AVANT TOUT AUTRE /api/**
                 .requestMatchers("/api/auth/login").permitAll()
                 // API ouverte en lecture seule pour le frontend - GET uniquement
                 .requestMatchers("GET", "/api/**").permitAll()
@@ -57,6 +59,18 @@ public class SecurityConfigProd {
                 .requestMatchers("/api/**").authenticated()
                 // Tout le reste nécessite authentification
                 .anyRequest().authenticated()
+            )
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\": \"Non autorisé\", \"message\": \"" + authException.getMessage() + "\"}");
+                })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\": \"Accès refusé\", \"message\": \"" + accessDeniedException.getMessage() + "\"}");
+                })
             )
             .httpBasic(basic -> basic.disable())
             .anonymous(Customizer.withDefaults());
