@@ -3,11 +3,11 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { provideRouter } from '@angular/router';
 import { Routes } from '@angular/router';
 
-import { AppComponent } from './app.component';
-import { LoginComponent } from './components/login/login.component';
-import { HomeComponent } from './components/home/home.component';
-import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { AuthGuard, AdminGuard } from './guards/auth.guard';
+import { AppComponent } from './app/app.component';
+import { LoginComponent } from './app/components/login/login.component';
+import { HomeComponent } from './app/components/home/home.component';
+import { DashboardComponent } from './app/components/dashboard/dashboard.component';
+import { AuthGuard, AdminGuard } from './app/guards/auth.guard';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },

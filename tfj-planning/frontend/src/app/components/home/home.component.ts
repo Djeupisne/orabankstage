@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { PlanningService } from '../../services/planning.service';
-import { Schedule } from '../../models/index';
+import { Schedule } from '../../models/schedule';
 import { TranslateDayPipe } from '../../pipes/translate-day.pipe';
 
 @Component({
