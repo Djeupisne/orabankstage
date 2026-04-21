@@ -22,7 +22,7 @@ export class DashboardComponent implements OnInit {
   showUserModal: boolean = false;
 
   constructor(
-    private authService: AuthService,
+    public authService: AuthService,
     private dashboardService: DashboardService,
     private employeeService: EmployeeService,
     private router: Router
