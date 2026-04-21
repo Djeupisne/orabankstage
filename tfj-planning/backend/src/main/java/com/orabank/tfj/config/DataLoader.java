@@ -57,11 +57,11 @@ public class DataLoader {
                         .description("Gestion de projets informatiques")
                         .build()));
                 
-                HierarchicalLevel cadreLevel = hierarchicalLevelRepository.findByCode("CADRE")
+                HierarchicalLevel cadreLevel = hierarchicalLevelRepository.findByName("Cadre")
                     .orElseGet(() -> hierarchicalLevelRepository.save(HierarchicalLevel.builder()
                         .name("Cadre")
-                        .code("CADRE")
-                        .priority(2)
+                        .description("Niveau cadre")
+                        .levelOrder(2)
                         .build()));
                 
                 Employee adminEmployee = Employee.builder()
@@ -122,9 +122,9 @@ public class DataLoader {
 
                 // 3. Niveaux hiérarchiques
                 List<HierarchicalLevel> levels = Arrays.asList(
-                    HierarchicalLevel.builder().name("Collaborateur").code("COLLABORATEUR").priority(1).build(),
-                    HierarchicalLevel.builder().name("Cadre").code("CADRE").priority(2).build(),
-                    HierarchicalLevel.builder().name("Manager").code("MANAGER").priority(3).build()
+                    HierarchicalLevel.builder().name("Collaborateur").description("Niveau collaborateur").levelOrder(1).build(),
+                    HierarchicalLevel.builder().name("Cadre").description("Niveau cadre").levelOrder(2).build(),
+                    HierarchicalLevel.builder().name("Manager").description("Niveau manager").levelOrder(3).build()
                 );
                 hierarchicalLevelRepository.saveAll(levels);
                 log.info("✓ {} niveaux hiérarchiques créés", levels.size());
@@ -141,9 +141,9 @@ public class DataLoader {
                 Role chefProjetRole = roleRepository.findByName("Chef de projet").get();
                 Role technicienRole = roleRepository.findByName("Technicien support").get();
                 
-                HierarchicalLevel collaborateurLevel = hierarchicalLevelRepository.findByCode("COLLABORATEUR").get();
-                HierarchicalLevel cadreLevel = hierarchicalLevelRepository.findByCode("CADRE").get();
-                HierarchicalLevel managerLevel = hierarchicalLevelRepository.findByCode("MANAGER").get();
+                HierarchicalLevel collaborateurLevel = hierarchicalLevelRepository.findByName("Collaborateur").get();
+                HierarchicalLevel cadreLevel = hierarchicalLevelRepository.findByName("Cadre").get();
+                HierarchicalLevel managerLevel = hierarchicalLevelRepository.findByName("Manager").get();
 
                 // 4. Employés - Service Applications
                 List<Employee> employees = Arrays.asList(
@@ -217,7 +217,7 @@ public class DataLoader {
                         .dateFin(LocalDate.of(2026, 6, 19))
                         .estDemiJourneeDebut(false)
                         .estDemiJourneeFin(false)
-                        .typeConge(Conge.TypeConge.CONGES_PAYES)
+                        .typeConge("CONGES_PAYES")
                         .build(),
                     // Congé pour Folly GANOU du 22 au 26 juin 2026
                     Conge.builder()
@@ -226,7 +226,7 @@ public class DataLoader {
                         .dateFin(LocalDate.of(2026, 6, 26))
                         .estDemiJourneeDebut(false)
                         .estDemiJourneeFin(false)
-                        .typeConge(Conge.TypeConge.CONGES_PAYES)
+                        .typeConge("CONGES_PAYES")
                         .build(),
                     // Demi-journée de congé pour Ama TCHASSAN (matin du 8 juin 2026)
                     Conge.builder()
@@ -235,7 +235,7 @@ public class DataLoader {
                         .dateFin(LocalDate.of(2026, 6, 8))
                         .estDemiJourneeDebut(true)
                         .estDemiJourneeFin(false)
-                        .typeConge(Conge.TypeConge.CONGES_PAYES)
+                        .typeConge("CONGES_PAYES")
                         .build()
                 );
                 congeRepository.saveAll(conges);
@@ -253,7 +253,7 @@ public class DataLoader {
                         .dateFin(LocalDate.of(2026, 6, 12))
                         .estDemiJourneeDebut(false)
                         .estDemiJourneeFin(false)
-                        .motif(AbsenceExceptionnelle.Motif.MALADIE)
+                        .motif("MALADIE")
                         .commentaire("Grippe avec fièvre")
                         .saisiPar("Admin DSI")
                         .dateSaisie(LocalDate.now())
@@ -266,7 +266,7 @@ public class DataLoader {
                         .dateFin(LocalDate.of(2026, 6, 15))
                         .estDemiJourneeDebut(true)
                         .estDemiJourneeFin(false)
-                        .motif(AbsenceExceptionnelle.Motif.IMPREVU)
+                        .motif("IMPREVU")
                         .commentaire("Problème de transport")
                         .saisiPar("Admin DSI")
                         .dateSaisie(LocalDate.now())
