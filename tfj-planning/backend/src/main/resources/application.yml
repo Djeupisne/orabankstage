@@ -1,168 +1,46 @@
-# Configuration principale - paramètres communs à tous les environnements
-server:
-  port: ${PORT:8080}
-
 spring:
-  application:
-    name: tfj-planning
-
-  datasource:
-    url: ${JDBC_DATABASE_URL:${DATABASE_URL:jdbc:postgresql://localhost:5432/tfj_planning}}
-    username: ${DATABASE_USERNAME:${DB_USER:postgres}}
-    password: ${DATABASE_PASSWORD:${DB_PASS:postgres}}
-    driver-class-name: org.postgresql.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: false
-    open-in-view: true
-    properties:
-      hibernate:
-        format_sql: true
-
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
-
-# Logging de base
-logging:
-  level:
-    com.orabank.tfj: DEBUG
-    org.springframework.web: INFO
-
-# API Documentation
-springdoc:
-  api-docs:
-    path: /api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-
-# Security (configuration de base)
-security:
-  jwt:
-    secret: ${JWT_SECRET:your-secret-key-change-in-production-min-64-chars}
-    expiration: ${JWT_EXPIRATION:86400000}
-
----
-# ===========================================
-# Profile DEV (défaut)
-# ===========================================
-spring:
-  config:
-    activate:
-      on-profile: dev
-
-logging:
-  level:
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    org.springframework.security: DEBUG
-
----
-# ===========================================
-# Profile PROD
-# ===========================================
-spring:
-  config:
-    activate:
-      on-profile: prod
+  
+  application:
+    name: planning-gestion
+  
+  jackson:
+    time-zone: Africa/Lome
+    date-format: yyyy-MM-dd
 
   datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:planning_db}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 20
-      minimum-idle: 5
-      idle-timeout: 300000
-      connection-timeout: 20000
-      max-lifetime: 1200000
-      leak-detection-threshold: 60000
-      pool-name: TfjPlanningHikariPool
-      auto-commit: false
+      maximum-pool-size: 10
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
 
   jpa:
+    open-in-view: false # Désactivé pour la prod
     hibernate:
-      ddl-auto: validate
-    open-in-view: false
-    show-sql: false
+      ddl-auto: validate # Ne jamais créer/modifier les tables auto en prod
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
         jdbc:
-          batch_size: 50
-          order_inserts: true
-          order_updates: true
-          batch_versioned_data: true
-        query:
-          plan_cache_max_size: 2048
-          in_clause_parameter_padding: true
-        cache:
-          use_second_level_cache: false
-          use_query_cache: false
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        connection:
-          provider_disables_autocommit: true
-
-  jackson:
-    serialization:
-      write-dates-as-timestamps: false
-      fail-on-empty-beans: false
-    deserialization:
-      fail-on-unknown-properties: false
-    default-property-inclusion: non_null
-
-logging:
-  level:
-    com.orabank.tfj: INFO
-    org.springframework.web: WARN
-    org.hibernate: WARN
-    org.hibernate.SQL: WARN
-    com.zaxxer.hikari: INFO
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-  file:
-    name: logs/tfj-planning.log
-    max-size: 10MB
-    max-history: 30
-
-springdoc:
-  api-docs:
-    enabled: false
-  swagger-ui:
-    enabled: false
-
-security:
-  jwt:
-    secret: ${JWT_SECRET:CHANGE_THIS_SECRET_KEY_IN_PRODUCTION_MIN_64_CHARS_WITH_SPECIAL_CHARS_AND_NUMBERS_1234567890!@#$%}
-    expiration: ${JWT_EXPIRATION:3600000}
-    refresh-expiration: ${JWT_REFRESH_EXPIRATION:86400000}
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics
-      base-path: /actuator
-  endpoint:
-    health:
-      show-details: when-authorized
-    info:
-      enabled: true
-  health:
-    db:
-      enabled: true
-    diskspace:
-      enabled: true
-      threshold: 10485760
+          time_zone: Africa/Lome
+        order_inserts: true
+        order_updates: true
+        batch_versioned_data: true
+    show-sql: false
 
 server:
+  port: ${SERVER_PORT:8080}
   servlet:
-    context-path: /
+    session:
+      timeout: 30m
   compression:
     enabled: true
-    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
-  tomcat:
-    threads:
-      max: 200
-      min-spare: 10
-    connection-timeout: 20000
-    max-connections: 8192
-    accept-count: 100
+
+logging:
