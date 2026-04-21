@@ -68,7 +68,7 @@ public class SecurityConfigProd {
         CorsConfiguration configuration = new CorsConfiguration();
         
         // Autoriser tous les domaines en production (à restreindre si nécessaire)
-        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList(
             "Authorization",
