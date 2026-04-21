@@ -3,26 +3,30 @@
 *.class
 *.o
 *.obj
-*.out
+*.exe
 *.dll
 *.so
 *.a
-*.exe
+*.out
+target/
+build/
 
 # Dependencies
-target/
-.gradle/
-.mypy_cache/
-.pytest_cache/
 node_modules/
 venv/
 .venv/
 __pycache__/
+.mypy_cache/
+.pytest_cache/
+.gradle/
+julia-*/
+zig*/
 
 # Logs and temp files
 *.log
 *.tmp
 *.swp
+*.swo
 
 # Environment
 .env
@@ -42,7 +46,7 @@ coverage/
 htmlcov/
 .coverage
 
-# Archives
+# Compressed files
 *.zip
 *.gz
 *.tar
