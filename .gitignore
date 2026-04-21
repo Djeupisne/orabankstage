@@ -1,50 +1,23 @@
 ```
-# Java/Maven specific
-target/
+# Compiled and build artifacts
 *.class
-*.jar
-*.war
-*.ear
-*.iml
-*.ipr
-*.iws
+*.o
+*.obj
+*.out
 
-# IDE
+# Dependencies
+target/
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Editors
 .vscode/
 .idea/
-
-# Logs
-*.log
 
 # Environment
 .env
 .env.local
 *.env.*
-
-# Dependencies
-node_modules/
-**/node_modules/
-lib/
-**/lib/
-
-# Build outputs
-dist/
-build/
-out/
-bin/
-**/target/
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Python (if present)
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-.venv/
 ```

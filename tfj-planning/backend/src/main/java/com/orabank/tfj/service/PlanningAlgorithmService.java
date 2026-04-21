@@ -22,6 +22,7 @@ public class PlanningAlgorithmService {
     private final ScheduleRepository scheduleRepository;
     private final NonWorkingDayRepository nonWorkingDayRepository;
     private final CongeRepository congeRepository;
+    private final AbsenceExceptionnelleRepository absenceExceptionnelleRepository;
     
     /**
      * Génère le planning des TFJ et permanences selon les règles métier :
@@ -49,6 +50,14 @@ public class PlanningAlgorithmService {
         Map<Long, List<Conge>> congesByEmployee = new HashMap<>();
         for (Conge conge : allConges) {
             congesByEmployee.computeIfAbsent(conge.getEmployee().getId(), k -> new ArrayList<>()).add(conge);
+        }
+        
+        // Charger toutes les absences exceptionnelles de la période
+        List<com.orabank.tfj.model.AbsenceExceptionnelle> allAbsences = 
+                absenceExceptionnelleRepository.findAbsencesInPeriod(startDate, endDate);
+        Map<Long, List<com.orabank.tfj.model.AbsenceExceptionnelle>> absencesByEmployee = new HashMap<>();
+        for (com.orabank.tfj.model.AbsenceExceptionnelle absence : allAbsences) {
+            absencesByEmployee.computeIfAbsent(absence.getEmployee().getId(), k -> new ArrayList<>()).add(absence);
         }
         
         // Grouper les employés par rôle
@@ -105,7 +114,7 @@ public class PlanningAlgorithmService {
             // TFJ : Lundi à Vendredi
             if (dayOfWeek.getValue() >= DayOfWeek.MONDAY.getValue() && dayOfWeek.getValue() <= DayOfWeek.FRIDAY.getValue()) {
                 Schedule schedule = assignTFJ(currentDate, nonManagerEmployeesByRole, managerEmployeesByRole, 
-                                            soloStatusMap, lastAssignedDay, nonWorkingDays, congesByEmployee);
+                                            soloStatusMap, lastAssignedDay, nonWorkingDays, congesByEmployee, absencesByEmployee);
                 if (schedule != null) {
                     generatedSchedules.add(schedule);
                 }
@@ -113,7 +122,7 @@ public class PlanningAlgorithmService {
             // Permanence : Samedi
             else if (dayOfWeek == DayOfWeek.SATURDAY) {
                 Schedule schedule = assignPermanence(currentDate, nonManagerEmployeesByRole, managerEmployeesByRole,
-                                                     soloStatusMap, lastAssignedDay, nonWorkingDays, congesByEmployee);
+                                                     soloStatusMap, lastAssignedDay, nonWorkingDays, congesByEmployee, absencesByEmployee);
                 if (schedule != null) {
                     generatedSchedules.add(schedule);
                 }
@@ -135,7 +144,8 @@ public class PlanningAlgorithmService {
     private Schedule assignTFJ(LocalDate date, Map<String, List<Employee>> nonManagerEmployeesByRole,
                                Map<String, List<Employee>> managerEmployeesByRole,
                                Map<Long, Boolean> soloStatusMap, Map<Long, DayOfWeek> lastAssignedDay,
-                               List<NonWorkingDay> nonWorkingDays, Map<Long, List<Conge>> congesByEmployee) {
+                               List<NonWorkingDay> nonWorkingDays, Map<Long, List<Conge>> congesByEmployee,
+                               Map<Long, List<com.orabank.tfj.model.AbsenceExceptionnelle>> absencesByEmployee) {
         
         DayOfWeek dayOfWeek = date.getDayOfWeek();
         
@@ -154,6 +164,7 @@ public class PlanningAlgorithmService {
                 .flatMap(List::stream)
                 .filter(Employee::getActive)
                 .filter(emp -> !isEmployeeOnLeave(emp.getId(), date, congesByEmployee))
+                .filter(emp -> !isEmployeeOnExceptionalLeave(emp.getId(), date, absencesByEmployee))
                 .collect(Collectors.toList());
         
         if (dayOfWeek == DayOfWeek.FRIDAY && !soloNonManagers.isEmpty()) {
@@ -168,7 +179,7 @@ public class PlanningAlgorithmService {
         // Essayer d'abord avec les non-managers
         Employee selectedEmployee = selectEmployeeFromGroups(nonManagerEmployeesByRole, date, 
                                                               soloStatusMap, lastAssignedDay, 
-                                                              dayOfWeek, congesByEmployee, false);
+                                                              dayOfWeek, congesByEmployee, absencesByEmployee, false);
         
         if (selectedEmployee != null) {
             return createSchedule(selectedEmployee, date, Schedule.ScheduleType.TFJ);
@@ -178,7 +189,7 @@ public class PlanningAlgorithmService {
         log.info("Aucun non-manager disponible pour le {}, tentative avec les managers", date);
         selectedEmployee = selectEmployeeFromGroups(managerEmployeesByRole, date, 
                                                      soloStatusMap, lastAssignedDay, 
-                                                     dayOfWeek, congesByEmployee, true);
+                                                     dayOfWeek, congesByEmployee, absencesByEmployee, true);
         
         if (selectedEmployee != null) {
             log.info("Manager affecté : {} pour le {}", selectedEmployee.getFullName(), date);
@@ -195,7 +206,8 @@ public class PlanningAlgorithmService {
     private Schedule assignPermanence(LocalDate date, Map<String, List<Employee>> nonManagerEmployeesByRole,
                                       Map<String, List<Employee>> managerEmployeesByRole,
                                       Map<Long, Boolean> soloStatusMap, Map<Long, DayOfWeek> lastAssignedDay,
-                                      List<NonWorkingDay> nonWorkingDays, Map<Long, List<Conge>> congesByEmployee) {
+                                      List<NonWorkingDay> nonWorkingDays, Map<Long, List<Conge>> congesByEmployee,
+                                      Map<Long, List<com.orabank.tfj.model.AbsenceExceptionnelle>> absencesByEmployee) {
         
         // Les membres solos peuvent être programmés le samedi
         List<Employee> soloNonManagers = nonManagerEmployeesByRole.values().stream()
@@ -203,6 +215,7 @@ public class PlanningAlgorithmService {
                 .flatMap(List::stream)
                 .filter(Employee::getActive)
                 .filter(emp -> !isEmployeeOnLeave(emp.getId(), date, congesByEmployee))
+                .filter(emp -> !isEmployeeOnExceptionalLeave(emp.getId(), date, absencesByEmployee))
                 .collect(Collectors.toList());
         
         if (!soloNonManagers.isEmpty()) {
@@ -217,7 +230,7 @@ public class PlanningAlgorithmService {
         // Essayer avec les autres non-managers
         Employee selectedEmployee = selectEmployeeFromGroups(nonManagerEmployeesByRole, date,
                                                               soloStatusMap, lastAssignedDay,
-                                                              DayOfWeek.SATURDAY, congesByEmployee, false);
+                                                              DayOfWeek.SATURDAY, congesByEmployee, absencesByEmployee, false);
         
         if (selectedEmployee != null) {
             return createSchedule(selectedEmployee, date, Schedule.ScheduleType.PERMANENCE);
@@ -227,7 +240,7 @@ public class PlanningAlgorithmService {
         log.info("Aucun non-manager disponible pour la permanence du {}, tentative avec les managers", date);
         selectedEmployee = selectEmployeeFromGroups(managerEmployeesByRole, date,
                                                      soloStatusMap, lastAssignedDay,
-                                                     DayOfWeek.SATURDAY, congesByEmployee, true);
+                                                     DayOfWeek.SATURDAY, congesByEmployee, absencesByEmployee, true);
         
         if (selectedEmployee != null) {
             log.info("Manager affecté pour permanence : {} pour le {}", selectedEmployee.getFullName(), date);
@@ -243,6 +256,7 @@ public class PlanningAlgorithmService {
     private Employee selectEmployeeFromGroups(Map<String, List<Employee>> employeesByRole, LocalDate date,
                                                Map<Long, Boolean> soloStatusMap, Map<Long, DayOfWeek> lastAssignedDay,
                                                DayOfWeek targetDay, Map<Long, List<Conge>> congesByEmployee,
+                                               Map<Long, List<com.orabank.tfj.model.AbsenceExceptionnelle>> absencesByEmployee,
                                                boolean isManagerFallback) {
         
         List<Employee> eligibleEmployees = new ArrayList<>();
@@ -258,6 +272,12 @@ public class PlanningAlgorithmService {
                     // Vérifier si l'employé est en congé
                     if (isEmployeeOnLeave(emp.getId(), date, congesByEmployee)) {
                         log.debug("Employé {} en congé le {}, ignoré", emp.getFullName(), date);
+                        continue;
+                    }
+                    
+                    // Vérifier si l'employé est en absence exceptionnelle
+                    if (isEmployeeOnExceptionalLeave(emp.getId(), date, absencesByEmployee)) {
+                        log.debug("Employé {} en absence exceptionnelle le {}, ignoré", emp.getFullName(), date);
                         continue;
                     }
                     
@@ -286,6 +306,24 @@ public class PlanningAlgorithmService {
         
         for (Conge conge : conges) {
             if (conge.couvreDate(date)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Vérifie si un employé est en absence exceptionnelle à une date donnée
+     */
+    private boolean isEmployeeOnExceptionalLeave(Long employeeId, LocalDate date, 
+                                                  Map<Long, List<com.orabank.tfj.model.AbsenceExceptionnelle>> absencesByEmployee) {
+        List<com.orabank.tfj.model.AbsenceExceptionnelle> absences = absencesByEmployee.get(employeeId);
+        if (absences == null || absences.isEmpty()) {
+            return false;
+        }
+        
+        for (com.orabank.tfj.model.AbsenceExceptionnelle absence : absences) {
+            if (absence.couvreDate(date)) {
                 return true;
             }
         }
