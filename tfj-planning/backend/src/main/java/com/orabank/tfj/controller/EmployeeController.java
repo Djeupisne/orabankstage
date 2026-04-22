@@ -52,7 +52,6 @@ public class EmployeeController {
             employee.getFullName(),
             employee.getEmail(),
             employee.getActive(),
-            employee.getRole() != null ? employee.getRole().getName() : null,
             employee.getService() != null ? employee.getService().getName() : null
         );
     }
@@ -64,7 +63,6 @@ public class EmployeeController {
         String fullName,
         String email,
         Boolean active,
-        String roleName,
         String serviceName
     ) {}
 }

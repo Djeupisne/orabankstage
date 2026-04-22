@@ -8,7 +8,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -24,76 +23,17 @@ import java.util.List;
 @Slf4j
 public class DataLoader {
 
-    private final PasswordEncoder passwordEncoder;
-
     @Bean
     @Profile({"dev", "prod"})
     CommandLineRunner initData(ServiceRepository serviceRepository,
-                                RoleRepository roleRepository,
                                 HierarchicalLevelRepository hierarchicalLevelRepository,
                                 EmployeeRepository employeeRepository,
                                 NonWorkingDayRepository nonWorkingDayRepository,
                                 CongeRepository congeRepository,
-                                AbsenceExceptionnelleRepository absenceExceptionnelleRepository,
-                                UserRepository userRepository) {
+                                AbsenceExceptionnelleRepository absenceExceptionnelleRepository) {
         
         return args -> {
             log.info("=== Démarrage du chargement des données de test ===");
-
-            // 1. Vérifier si l'utilisateur admin existe déjà
-            if (userRepository.findByUsername("admin").isEmpty()) {
-                log.info("Création de l'utilisateur administrateur unique...");
-                
-                // Créer l'employé administrateur s'il n'existe pas
-                Service adminService = serviceRepository.findByName("Applications")
-                    .orElseGet(() -> serviceRepository.save(Service.builder()
-                        .name("Applications")
-                        .description("Service des applications métier")
-                        .build()));
-                
-                Role adminRole = roleRepository.findByName("Chef de projet")
-                    .orElseGet(() -> roleRepository.save(Role.builder()
-                        .name("Chef de projet")
-                        .description("Gestion de projets informatiques")
-                        .build()));
-                
-                HierarchicalLevel cadreLevel = hierarchicalLevelRepository.findByName("Cadre")
-                    .orElseGet(() -> hierarchicalLevelRepository.save(HierarchicalLevel.builder()
-                        .name("Cadre")
-                        .description("Niveau cadre")
-                        .levelOrder(2)
-                        .build()));
-                
-                Employee adminEmployee = Employee.builder()
-                    .firstName("Administrateur")
-                    .lastName("DSI")
-                    .email("admin.dsi@orabank.tg")
-                    .service(adminService)
-                    .role(adminRole)
-                    .hierarchicalLevel(cadreLevel)
-                    .active(true)
-                    .isSoloInGroup(false)
-                    .build();
-                adminEmployee = employeeRepository.save(adminEmployee);
-                
-                // Créer l'utilisateur avec identifiants prédéfinis
-                User adminUser = User.builder()
-                    .username("admin")
-                    .password(passwordEncoder.encode("Admin123!"))
-                    .email("admin.dsi@orabank.tg")
-                    .role("ADMIN")
-                    .active(true)
-                    .employee(adminEmployee)
-                    .build();
-                userRepository.save(adminUser);
-                
-                log.info("✓ Utilisateur administrateur créé avec succès");
-                log.info("  → Identifiant: admin");
-                log.info("  → Mot de passe: Admin123!");
-                log.info("  → Email: admin.dsi@orabank.tg");
-            } else {
-                log.info("✓ L'utilisateur administrateur existe déjà");
-            }
 
             // Charger les données de référence (vérification individuelle pour éviter les doublons)
             log.info("Insertion des données de référence (si elles n'existent pas déjà)...");
@@ -129,65 +69,7 @@ public class DataLoader {
             long serviceCount = serviceRepository.count();
             log.info("✓ {} services disponibles", serviceCount);
 
-            // 2. Rôles / fiches de poste - création seulement si n'existe pas
-            Role adminReseauRole = roleRepository.findByName("Administrateur réseau")
-                .orElseGet(() -> {
-                    log.info("Création du rôle 'Administrateur réseau'...");
-                    return roleRepository.save(Role.builder()
-                        .name("Administrateur réseau")
-                        .description("Gestion et administration du réseau")
-                        .build());
-                });
-            
-            Role developpeurRole = roleRepository.findByName("Développeur")
-                .orElseGet(() -> {
-                    log.info("Création du rôle 'Développeur'...");
-                    return roleRepository.save(Role.builder()
-                        .name("Développeur")
-                        .description("Développement des applications métier")
-                        .build());
-                });
-            
-            Role adminSystemeRole = roleRepository.findByName("Administrateur système")
-                .orElseGet(() -> {
-                    log.info("Création du rôle 'Administrateur système'...");
-                    return roleRepository.save(Role.builder()
-                        .name("Administrateur système")
-                        .description("Administration des systèmes et serveurs")
-                        .build());
-                });
-            
-            Role dbaRole = roleRepository.findByName("DBA")
-                .orElseGet(() -> {
-                    log.info("Création du rôle 'DBA'...");
-                    return roleRepository.save(Role.builder()
-                        .name("DBA")
-                        .description("Administration des bases de données")
-                        .build());
-                });
-            
-            Role chefProjetRole = roleRepository.findByName("Chef de projet")
-                .orElseGet(() -> {
-                    log.info("Création du rôle 'Chef de projet'...");
-                    return roleRepository.save(Role.builder()
-                        .name("Chef de projet")
-                        .description("Gestion de projets informatiques")
-                        .build());
-                });
-            
-            Role technicienRole = roleRepository.findByName("Technicien support")
-                .orElseGet(() -> {
-                    log.info("Création du rôle 'Technicien support'...");
-                    return roleRepository.save(Role.builder()
-                        .name("Technicien support")
-                        .description("Support utilisateur et maintenance")
-                        .build());
-                });
-            
-            long roleCount = roleRepository.count();
-            log.info("✓ {} rôles disponibles", roleCount);
-
-            // 3. Niveaux hiérarchiques - création seulement si n'existe pas
+            // 2. Niveaux hiérarchiques - création seulement si n'existe pas
             HierarchicalLevel collaborateurLevel = hierarchicalLevelRepository.findByName("Collaborateur")
                 .orElseGet(() -> {
                     log.info("Création du niveau 'Collaborateur'...");
@@ -221,41 +103,41 @@ public class DataLoader {
             long levelCount = hierarchicalLevelRepository.count();
             log.info("✓ {} niveaux hiérarchiques disponibles", levelCount);
 
-            // 4. Employés - création seulement si n'existe pas (vérification par email)
+            // 3. Employés - création seulement si n'existe pas (vérification par email)
             if (employeeRepository.findByEmail("k.amenyonor@orabank.tg").isEmpty()) {
                 log.info("Création des employés...");
                 List<Employee> employees = Arrays.asList(
                     // Applications
                     Employee.builder().firstName("Kofi").lastName("AMENYONOR").email("k.amenyonor@orabank.tg")
-                        .service(applicationsService).role(developpeurRole).hierarchicalLevel(collaborateurLevel)
+                        .service(applicationsService).hierarchicalLevel(collaborateurLevel)
                         .active(true).isSoloInGroup(false).build(),
                     Employee.builder().firstName("Ama").lastName("TCHASSAN").email("a.tchassan@orabank.tg")
-                        .service(applicationsService).role(developpeurRole).hierarchicalLevel(collaborateurLevel)
+                        .service(applicationsService).hierarchicalLevel(collaborateurLevel)
                         .active(true).isSoloInGroup(false).build(),
                     Employee.builder().firstName("Komlan").lastName("ADJEKPLE").email("k.adjekple@orabank.tg")
-                        .service(applicationsService).role(chefProjetRole).hierarchicalLevel(cadreLevel)
+                        .service(applicationsService).hierarchicalLevel(cadreLevel)
                         .active(true).isSoloInGroup(false).build(),
                     
                     // Infrastructure
                     Employee.builder().firstName("Folly").lastName("GANOU").email("f.ganou@orabank.tg")
-                        .service(infrastructureService).role(adminReseauRole).hierarchicalLevel(collaborateurLevel)
+                        .service(infrastructureService).hierarchicalLevel(collaborateurLevel)
                         .active(true).isSoloInGroup(false).build(),
                     Employee.builder().firstName("Esso").lastName("PITANG").email("e.pitang@orabank.tg")
-                        .service(infrastructureService).role(adminReseauRole).hierarchicalLevel(collaborateurLevel)
+                        .service(infrastructureService).hierarchicalLevel(collaborateurLevel)
                         .active(true).isSoloInGroup(false).build(),
                     Employee.builder().firstName("Akoussivi").lastName("BANITOKE").email("a.banitoke@orabank.tg")
-                        .service(infrastructureService).role(adminSystemeRole).hierarchicalLevel(collaborateurLevel)
+                        .service(infrastructureService).hierarchicalLevel(collaborateurLevel)
                         .active(true).isSoloInGroup(false).build(),
                     
                     // Exploitation
                     Employee.builder().firstName("Dodzi").lastName("KPESSOU").email("d.kpessou@orabank.tg")
-                        .service(exploitationService).role(dbaRole).hierarchicalLevel(collaborateurLevel)
+                        .service(exploitationService).hierarchicalLevel(collaborateurLevel)
                         .active(true).isSoloInGroup(false).build(),
                     Employee.builder().firstName("Amétévé").lastName("KOKOU").email("a.kokou@orabank.tg")
-                        .service(exploitationService).role(technicienRole).hierarchicalLevel(collaborateurLevel)
+                        .service(exploitationService).hierarchicalLevel(collaborateurLevel)
                         .active(true).isSoloInGroup(false).build(),
                     Employee.builder().firstName("Mana").lastName("ASSOGNA").email("m.assogna@orabank.tg")
-                        .service(exploitationService).role(chefProjetRole).hierarchicalLevel(managerLevel)
+                        .service(exploitationService).hierarchicalLevel(managerLevel)
                         .active(true).isSoloInGroup(false).build()
                 );
                 employeeRepository.saveAll(employees);
@@ -274,9 +156,8 @@ public class DataLoader {
             Employee dodziKpessou = employeeRepository.findByEmail("d.kpessou@orabank.tg").orElse(null);
             Employee ameteveKokou = employeeRepository.findByEmail("a.kokou@orabank.tg").orElse(null);
             Employee manaAssogna = employeeRepository.findByEmail("m.assogna@orabank.tg").orElse(null);
-            Employee adminEmployee = employeeRepository.findByEmail("admin.dsi@orabank.tg").orElse(null);
 
-            // 5. Jours fériés 2026 - création seulement si n'existe pas (vérification par date)
+            // 4. Jours fériés 2026 - création seulement si n'existe pas (vérification par date)
             if (nonWorkingDayRepository.findByDate(LocalDate.of(2026, 1, 1)).isEmpty()) {
                 log.info("Création des jours fériés 2026...");
                 List<NonWorkingDay> nonWorkingDays = Arrays.asList(
@@ -382,15 +263,6 @@ public class DataLoader {
             }
 
             log.info("=== Chargement des données de test terminé avec succès ===");
-            log.info("");
-            log.info("╔════════════════════════════════════════════════════════╗");
-            log.info("║         IDENTIFIANTS DE CONNEXION                      ║");
-            log.info("╠════════════════════════════════════════════════════════╣");
-            log.info("║  Identifiant : admin                                   ║");
-            log.info("║  Mot de passe  : Admin123!                             ║");
-            log.info("║  Rôle          : ADMIN                                 ║");
-            log.info("╚════════════════════════════════════════════════════════╝");
-            log.info("");
         };
     }
 }
