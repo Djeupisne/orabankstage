@@ -5,6 +5,10 @@ spring:
   application:
     name: planning-gestion
   
+  # ✅ AJOUTER CETTE SECTION - CRITICAL POUR RENDER
+  main:
+    lazy-initialization: true  # Démarrage lazy - RÉDUIT LE TEMPS DE BOOT
+  
   jackson:
     time-zone: Africa/Lome
     date-format: yyyy-MM-dd
@@ -19,21 +23,29 @@ spring:
       connection-timeout: 30000
       idle-timeout: 600000
       max-lifetime: 1800000
+      # ✅ AJOUTER - Accélère la connexion initiale
+      initialization-fail-timeout: -1  # Ne pas échouer si DB lente au démarrage
 
   jpa:
-    open-in-view: false # Désactivé pour la prod
+    open-in-view: false
     hibernate:
-      ddl-auto: validate # Ne jamais créer/modifier les tables auto en prod
+      ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
         jdbc:
           time_zone: Africa/Lome
+        # ✅ OPTIMISATIONS HIBERNATE
         order_inserts: true
         order_updates: true
         batch_versioned_data: true
+        jdbc.batch_size: 20  # AJOUTER - Taille du batch
+        cache.use_second_level_cache: false  # AJOUTER - Désactiver cache L2 si non utilisé
+        cache.use_query_cache: false  # AJOUTER - Désactiver cache de requêtes
     show-sql: false
+    # ✅ AJOUTER - Désactiver JPA bootstrap en mode lazy
+    properties.jakarta.persistence.validation.mode: none
 
 server:
   port: ${SERVER_PORT:8080}
@@ -43,5 +55,17 @@ server:
   compression:
     enabled: true
   forward-headers-strategy: framework
+  # ✅ AJOUTER - Timeout pour Render
+  tomcat:
+    connection-timeout: 60000  # 60 secondes
 
+# ✅ AJOUTER - Logs minimal en production
 logging:
+  level:
+    root: WARN
+    com.orabank.tfj: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+    org.springframework.boot.web.embedded.tomcat: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
