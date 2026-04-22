@@ -35,4 +35,9 @@ public interface CongeRepository extends JpaRepository<Conge, Long> {
            "AND c.dateDebut <= :date AND c.dateFin >= :date")
     boolean isEmployeeOnLeave(@Param("employeeId") Long employeeId,
                                @Param("date") LocalDate date);
+
+    /**
+     * Trouve un congé par employé et date de début
+     */
+    List<Conge> findByEmployeeAndDateDebut(com.orabank.tfj.model.Employee employee, LocalDate dateDebut);
 }
