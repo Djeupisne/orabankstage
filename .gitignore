@@ -1,70 +1,81 @@
 ```
 # Dependencies
-target/
+node_modules/
+.venv/
+venv/
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+.julia/
+zig*/
+julia-*/
 
-# Logs and temp files
+# Build artifacts
+dist/
+build/
+target/
+*.o
+*.obj
+*.pyc
+*.class
+*.exe
+*.dll
+*.so
+*.a
+*.out
+
+# Logs and temporary files
 *.log
 *.tmp
+*.swp
+*.swo
+*.DS_Store
+Thumbs.db
 
-# Environment
+# Environment files
 .env
 .env.local
 *.env.*
+
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
+
+# Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
 
 # Editors
 .vscode/
 .idea/
 
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-.venv/
-.egg-info/
-*.egg
-
-# Java
-*.class
-*.jar
-*.war
-*.ear
-.META-INF/
-!META-INF/services/
-*.jnilib
-
-# Build tools
+# Gradle
 .gradle/
-build/
-dist/
-out/
 
-# IDE
-*.swp
-*.swo
-*~
-.DS_Store
-Thumbs.db
-
-# Testing
-.coverage
-htmlcov/
-.coverage.*
-.nyc_output/
-istanbul/
+# MyPy
 .mypy_cache/
-.pytest_cache/
-.hypothesis/
 
-# OS generated
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# PyTest
+.pytest_cache/
 ```
