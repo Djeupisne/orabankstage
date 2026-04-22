@@ -11,6 +11,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,7 +40,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of(
+        // Utiliser "*" pour permettre toutes les origines (plus simple pour Render)
+        // Note: allowedOriginPatterns avec "*" ne fonctionne pas avec allowCredentials(true)
+        // On utilise donc une liste explicite d'origines autorisées
+        config.setAllowedOrigins(List.of(
             "https://tfj-planning-frontend.onrender.com",
             "http://localhost:4200",
             "http://localhost:3000"
@@ -67,7 +72,8 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         
-        config.setAllowedOriginPatterns(List.of(
+        // Utiliser la même configuration que ci-dessus
+        config.setAllowedOrigins(List.of(
             "https://tfj-planning-frontend.onrender.com",
             "http://localhost:4200",
             "http://localhost:3000"
@@ -84,5 +90,29 @@ public class SecurityConfig {
         
         source.registerCorsConfiguration("/**", config);
         return new org.springframework.web.filter.CorsFilter(source);
+    }
+
+    /**
+     * Configuration CORS additionnelle via WebMvcConfigurer
+     * Pour s'assurer que CORS fonctionne correctement avec Spring MVC
+     */
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                    .allowedOrigins(
+                        "https://tfj-planning-frontend.onrender.com",
+                        "http://localhost:4200",
+                        "http://localhost:3000"
+                    )
+                    .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
+                    .allowedHeaders("*")
+                    .exposedHeaders("Authorization", "Content-Disposition", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials")
+                    .allowCredentials(true)
+                    .maxAge(3600);
+            }
+        };
     }
 }
