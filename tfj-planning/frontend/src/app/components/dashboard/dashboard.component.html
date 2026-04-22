@@ -8,13 +8,6 @@
     
     <nav class="sidebar-nav">
       <a 
-        [class.active]="activeTab === 'overview'" 
-        (click)="setActiveTab('overview')"
-        class="nav-item"
-      >
-        📊 Vue d'ensemble
-      </a>
-      <a 
         [class.active]="activeTab === 'employees'" 
         (click)="setActiveTab('employees')"
         class="nav-item"
@@ -38,63 +31,6 @@
     </header>
 
     <div class="content">
-      <!-- Overview Tab -->
-      <div *ngIf="activeTab === 'overview'" class="tab-content">
-        <h2>Statistiques Générales</h2>
-        
-        <div *ngIf="loading" class="loading">Chargement...</div>
-        
-        <div *ngIf="!loading && stats" class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon">👥</div>
-            <div class="stat-info">
-              <h3>{{ stats.totalEmployees }}</h3>
-              <p>Total Employés</p>
-            </div>
-          </div>
-
-          <div class="stat-card success">
-            <div class="stat-icon">✅</div>
-            <div class="stat-info">
-              <h3>{{ stats.activeEmployees }}</h3>
-              <p>Employés Actifs</p>
-            </div>
-          </div>
-
-          <div class="stat-card danger">
-            <div class="stat-icon">❌</div>
-            <div class="stat-info">
-              <h3>{{ stats.inactiveEmployees }}</h3>
-              <p>Employés Inactifs</p>
-            </div>
-          </div>
-
-          <div class="stat-card info">
-            <div class="stat-icon">📋</div>
-            <div class="stat-info">
-              <h3>{{ stats.totalSchedules }}</h3>
-              <p>Plannings Générés</p>
-            </div>
-          </div>
-
-          <div class="stat-card primary">
-            <div class="stat-icon">📅</div>
-            <div class="stat-info">
-              <h3>{{ stats.tfjSchedules }}</h3>
-              <p>TFJ</p>
-            </div>
-          </div>
-
-          <div class="stat-card secondary">
-            <div class="stat-icon">🏦</div>
-            <div class="stat-info">
-              <h3>{{ stats.permanenceSchedules }}</h3>
-              <p>Permanences</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- Employees Tab -->
       <div *ngIf="activeTab === 'employees'" class="tab-content">
         <h2>Gestion des Employés</h2>
