@@ -52,28 +52,28 @@ public class SecurityConfig {
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().authenticated()
             )
-            .exceptionHandling(ex -> ex
-                .authenticationEntryPoint((request, response, authException) -> {
-                    String origin = request.getHeader("Origin");
-                    if (origin != null) {
-                        response.setHeader("Access-Control-Allow-Origin", origin);
-                        response.setHeader("Access-Control-Allow-Credentials", "true");
-                    }
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json;charset=UTF-8");
-                    response.getWriter().write("{\"error\":\"Non autorisé\"}");
-                })
-                .accessDeniedHandler((request, response, ex) -> {
-                    String origin = request.getHeader("Origin");
-                    if (origin != null) {
-                        response.setHeader("Access-Control-Allow-Origin", origin);
-                        response.setHeader("Access-Control-Allow-Credentials", "true");
-                    }
-                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    response.setContentType("application/json;charset=UTF-8");
-                    response.getWriter().write("{\"error\":\"Accès refusé\"}");
-                })
-            )
+           .exceptionHandling(exc -> exc
+    .authenticationEntryPoint((request, response, authException) -> {
+        String origin = request.getHeader("Origin");
+        if (origin != null) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+        }
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write("{\"error\":\"Non autorisé\"}");
+    })
+    .accessDeniedHandler((request, response, accessDeniedException) -> {
+        String origin = request.getHeader("Origin");
+        if (origin != null) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+        }
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write("{\"error\":\"Accès refusé\"}");
+    })
+)
             .httpBasic(basic -> basic.disable())
             .anonymous(Customizer.withDefaults());
 
