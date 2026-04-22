@@ -85,7 +85,8 @@ public class SecurityConfigProd {
         CorsConfiguration configuration = new CorsConfiguration();
         
         // Autoriser le domaine du frontend en production
-        configuration.setAllowedOriginPatterns(List.of(
+        // Utilisation de setAllowedOrigins (pas patterns) avec allowCredentials(true)
+        configuration.setAllowedOrigins(List.of(
             "https://tfj-planning-frontend.onrender.com",
             "http://localhost:3000",
             "http://localhost:8080"
