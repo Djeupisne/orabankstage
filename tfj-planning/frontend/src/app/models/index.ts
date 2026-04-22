@@ -1,29 +1,3 @@
-export interface User {
-  id?: number;
-  username: string;
-  email: string;
-  role: string;
-  active: boolean;
-  createdAt?: string;
-  employeeId?: number;
-  employeeFullName?: string;
-  fullName?: string;
-}
-
-export interface LoginRequest {
-  username: string;
-  password: string;
-}
-
-export interface LoginResponse {
-  token: string;
-  username: string;
-  email: string;
-  role: string;
-  employeeId?: number;
-  fullName?: string;
-}
-
 export interface Employee {
   id?: number;
   firstName: string;
@@ -44,10 +18,6 @@ export interface DashboardStats {
   totalEmployees: number;
   activeEmployees: number;
   inactiveEmployees: number;
-  totalUsers: number;
-  adminUsers: number;
-  gestionnaireUsers: number;
-  operateurUsers: number;
   totalSchedules: number;
   tfjSchedules: number;
   permanenceSchedules: number;

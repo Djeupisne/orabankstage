@@ -22,16 +22,6 @@
         👥 Employés
       </a>
       <a 
-        [class.active]="activeTab === 'users'" 
-        (click)="setActiveTab('users')"
-        class="nav-item"
-      >
-        🔐 Utilisateurs
-      </a>
-      <a routerLink="/home" class="nav-item">
-        🏠 Accueil
-      </a>
-      <a 
         [class.active]="activeTab === 'planning'" 
         (click)="setActiveTab('planning')"
         class="nav-item"
@@ -39,22 +29,12 @@
         📅 Générer Planning
       </a>
     </nav>
-
-    <div class="sidebar-footer">
-      <button (click)="logout()" class="btn-logout">
-        🚪 Déconnexion
-      </button>
-    </div>
   </aside>
 
   <!-- Main Content -->
   <main class="main-content">
     <header class="top-bar">
-      <h1>Tableau de Bord Administrateur</h1>
-      <div class="user-info">
-        <span>{{ authService.getCurrentUser()?.fullName || authService.getCurrentUser()?.username }}</span>
-        <span class="badge">{{ authService.getCurrentUser()?.role }}</span>
-      </div>
+      <h1>Tableau de Bord</h1>
     </header>
 
     <div class="content">
@@ -86,22 +66,6 @@
             <div class="stat-info">
               <h3>{{ stats.inactiveEmployees }}</h3>
               <p>Employés Inactifs</p>
-            </div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-icon">🔐</div>
-            <div class="stat-info">
-              <h3>{{ stats.totalUsers }}</h3>
-              <p>Utilisateurs</p>
-            </div>
-          </div>
-
-          <div class="stat-card warning">
-            <div class="stat-icon">👨‍💼</div>
-            <div class="stat-info">
-              <h3>{{ stats.adminUsers }}</h3>
-              <p>Administrateurs</p>
             </div>
           </div>
 
@@ -165,47 +129,6 @@
                   [class.btn-danger]="emp.active"
                 >
                   {{ emp.active ? 'Désactiver' : 'Activer' }}
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Users Tab -->
-      <div *ngIf="activeTab === 'users'" class="tab-content">
-        <h2>Gestion des Utilisateurs</h2>
-        
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Identifiant</th>
-              <th>Email</th>
-              <th>Rôle</th>
-              <th>Employé lié</th>
-              <th>Statut</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let user of users">
-              <td>{{ user.username }}</td>
-              <td>{{ user.email }}</td>
-              <td>
-                <span class="badge">{{ user.role }}</span>
-              </td>
-              <td>{{ user.employeeFullName || '-' }}</td>
-              <td>
-                <span [class]="user.active ? 'status-active' : 'status-inactive'">
-                  {{ user.active ? 'Actif' : 'Inactif' }}
-                </span>
-              </td>
-              <td>
-                <button 
-                  (click)="deleteUser(user.id!)" 
-                  class="btn-sm btn-danger"
-                >
-                  Supprimer
                 </button>
               </td>
             </tr>
