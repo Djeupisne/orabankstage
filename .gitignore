@@ -8,21 +8,18 @@ build/
 target/
 
 # Dependencies
+.gradle/
+.mypy_cache/
+.pytest_cache/
+__pycache__/
 node_modules/
 venv/
 .venv/
-__pycache__/
-.mypy_cache/
-.pytest_cache/
-.gradle/
-julia-*/
-zig*/
 
 # Logs and temp files
 *.log
 *.tmp
 *.swp
-*.swo
 
 # Environment
 .env
@@ -32,17 +29,19 @@ zig*/
 # Editors
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # System files
 .DS_Store
 Thumbs.db
 
-# Coverage
+# Coverage reports
 coverage/
 htmlcov/
 .coverage
 
-# Compressed files
+# Archives
 *.zip
 *.gz
 *.tar

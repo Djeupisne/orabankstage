@@ -15,7 +15,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 @Tag(name = "Authentification", description = "API d'authentification et gestion des utilisateurs")
 public class AuthController {
     
