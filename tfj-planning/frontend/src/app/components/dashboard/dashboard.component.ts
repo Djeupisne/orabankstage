@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
 import { DashboardService, EmployeeService } from '../../services/employee.service';
 import { PlanningService } from '../../services/planning.service';
-import { DashboardStats, Employee, User, Schedule } from '../../models/index';
+import { DashboardStats, Employee, Schedule } from '../../models/index';
 import { TranslateDayPipe } from '../../pipes/translate-day.pipe';
 import { FormsModule } from '@angular/forms';
 
@@ -18,11 +17,8 @@ import { FormsModule } from '@angular/forms';
 export class DashboardComponent implements OnInit {
   stats: DashboardStats | null = null;
   employees: Employee[] = [];
-  users: User[] = [];
   loading: boolean = false;
   activeTab: string = 'overview';
-  showEmployeeModal: boolean = false;
-  showUserModal: boolean = false;
   
   // Planning generation
   startDate: string = '';
@@ -34,7 +30,6 @@ export class DashboardComponent implements OnInit {
   showPlanningSection: boolean = false;
 
   constructor(
-    public authService: AuthService,
     private dashboardService: DashboardService,
     private employeeService: EmployeeService,
     private planningService: PlanningService,
@@ -42,13 +37,8 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    if (!this.authService.isAdmin()) {
-      this.router.navigate(['/home']);
-      return;
-    }
     this.loadDashboardStats();
     this.loadEmployees();
-    this.loadUsers();
     this.initPlanningDates();
   }
 
@@ -77,22 +67,6 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  loadUsers(): void {
-    this.authService.getAllUsers().subscribe({
-      next: (users: User[]) => {
-        this.users = users;
-      },
-      error: (err: any) => {
-        console.error('Erreur chargement utilisateurs:', err);
-      }
-    });
-  }
-
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/home']);
-  }
-
   setActiveTab(tab: string): void {
     this.activeTab = tab;
   }
@@ -109,20 +83,6 @@ export class DashboardComponent implements OnInit {
         error: (err) => {
           console.error('Erreur mise à jour:', err);
           employee.active = currentStatus;
-        }
-      });
-    }
-  }
-
-  deleteUser(id: number): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
-      this.authService.deleteUser(id).subscribe({
-        next: () => {
-          this.loadUsers();
-          this.loadDashboardStats();
-        },
-        error: (err: any) => {
-          console.error('Erreur suppression:', err);
         }
       });
     }
