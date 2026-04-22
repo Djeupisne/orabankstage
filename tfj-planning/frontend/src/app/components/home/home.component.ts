@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { PlanningService } from '../../services/planning.service';
+import { AuthService } from '../../services/auth.service';
 import { Schedule } from '../../models/schedule';
 import { TranslateDayPipe } from '../../pipes/translate-day.pipe';
 
@@ -23,7 +24,8 @@ export class HomeComponent implements OnInit {
   showPlanningSection: boolean = false;
   
   constructor(
-    private planningService: PlanningService
+    private planningService: PlanningService,
+    public authService: AuthService
   ) {}
 
   ngOnInit(): void {

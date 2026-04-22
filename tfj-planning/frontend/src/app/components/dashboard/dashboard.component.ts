@@ -79,10 +79,10 @@ export class DashboardComponent implements OnInit {
 
   loadUsers(): void {
     this.authService.getAllUsers().subscribe({
-      next: (users) => {
+      next: (users: User[]) => {
         this.users = users;
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Erreur chargement utilisateurs:', err);
       }
     });
@@ -121,7 +121,7 @@ export class DashboardComponent implements OnInit {
           this.loadUsers();
           this.loadDashboardStats();
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('Erreur suppression:', err);
         }
       });

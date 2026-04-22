@@ -63,7 +63,7 @@
     </section>
 
     <!-- Planning Generation Section - Only for Admin -->
-    <section *ngIf="isAdmin" class="planning-section">
+    <section *ngIf="authService.isAdmin()" class="planning-section">
       <h2>Générer un Planning (Admin uniquement)</h2>
       
       <div class="date-form">
