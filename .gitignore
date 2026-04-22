@@ -1,42 +1,70 @@
 ```
-# Compiled Java classes
-*.class
-
-# Maven/Gradle build artifacts
-target/
-build/
-
 # Dependencies
-lib/
-libs/
+target/
 
-# IDE files
-.vscode/
-.idea/
-*.iml
-*.ipr
-*.iws
-
-# Logs
+# Logs and temp files
 *.log
+*.tmp
 
 # Environment
 .env
 .env.local
 *.env.*
 
-# OS generated files
-.DS_Store
-Thumbs.db
+# Editors
+.vscode/
+.idea/
 
-# Package manager
-node_modules/
-
-# Python (if applicable)
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-.venv/
+.Python
+env/
 venv/
+.venv/
+.egg-info/
+*.egg
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+.META-INF/
+!META-INF/services/
+*.jnilib
+
+# Build tools
+.gradle/
+build/
+dist/
+out/
+
+# IDE
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Testing
+.coverage
+htmlcov/
+.coverage.*
+.nyc_output/
+istanbul/
+.mypy_cache/
+.pytest_cache/
+.hypothesis/
+
+# OS generated
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 ```
