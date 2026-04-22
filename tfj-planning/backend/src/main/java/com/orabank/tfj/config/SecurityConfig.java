@@ -3,7 +3,6 @@ package com.orabank.tfj.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.config.Customizer;
@@ -29,9 +28,8 @@ import java.util.List;
  */
 @Configuration
 @EnableWebSecurity
-@Profile("prod")
 @RequiredArgsConstructor
-public class SecurityConfigProd {
+public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -49,8 +47,8 @@ public class SecurityConfigProd {
             .authorizeHttpRequests(auth -> auth
                 // Endpoints publics pour le monitoring
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                // Swagger et API docs désactivés en prod
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").denyAll()
+                // Swagger et API docs
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
                 // Endpoints d'authentification publics (login) - DOIT ETRE AVANT TOUT AUTRE /api/**
                 .requestMatchers("/api/auth/login").permitAll()
                 // API ouverte en lecture seule pour le frontend - GET uniquement
@@ -82,12 +80,13 @@ public class SecurityConfigProd {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Autoriser le domaine du frontend en production
-        // Utilisation de setAllowedOriginPatterns avec allowCredentials(true)
-        configuration.setAllowedOriginPatterns(List.of(
+        // Autoriser TOUS les domaines en mode développement/test
+        // En production, restreindre aux domaines autorisés
+        configuration.setAllowedOrigins(List.of(
             "https://tfj-planning-frontend.onrender.com",
             "http://localhost:3000",
-            "http://localhost:8080"
+            "http://localhost:8080",
+            "http://localhost:4200"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList(
