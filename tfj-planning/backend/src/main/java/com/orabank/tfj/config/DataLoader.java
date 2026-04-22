@@ -264,12 +264,17 @@ public class DataLoader {
                 log.info("✓ Les employés existent déjà");
             }
 
-            // Récupérer les employés pour les congés et absences
+            // Récupérer TOUS les employés nécessaires pour les congés et absences
+            // Si un employé n'existe pas, on le récupère plus tard après création
             Employee kofiAmenyonor = employeeRepository.findByEmail("k.amenyonor@orabank.tg").orElse(null);
             Employee follyGanou = employeeRepository.findByEmail("f.ganou@orabank.tg").orElse(null);
             Employee amaTchassan = employeeRepository.findByEmail("a.tchassan@orabank.tg").orElse(null);
             Employee essoPitang = employeeRepository.findByEmail("e.pitang@orabank.tg").orElse(null);
             Employee akoussiviBanitoke = employeeRepository.findByEmail("a.banitoke@orabank.tg").orElse(null);
+            Employee dodziKpessou = employeeRepository.findByEmail("d.kpessou@orabank.tg").orElse(null);
+            Employee ameteveKokou = employeeRepository.findByEmail("a.kokou@orabank.tg").orElse(null);
+            Employee manaAssogna = employeeRepository.findByEmail("m.assogna@orabank.tg").orElse(null);
+            Employee adminEmployee = employeeRepository.findByEmail("admin.dsi@orabank.tg").orElse(null);
 
             // 5. Jours fériés 2026 - création seulement si n'existe pas (vérification par date)
             if (nonWorkingDayRepository.findByDate(LocalDate.of(2026, 1, 1)).isEmpty()) {
@@ -336,12 +341,16 @@ public class DataLoader {
             }
 
             // 7. Absences exceptionnelles de test - création seulement si n'existe pas
-            if (essoPitang != null && absenceExceptionnelleRepository.findByEmployeeAndDateDebut(essoPitang, LocalDate.of(2026, 6, 10)).isEmpty()) {
+            // Recharger les employés depuis la base pour s'assurer qu'ils existent
+            Employee essoPitangFinal = employeeRepository.findByEmail("e.pitang@orabank.tg").orElse(null);
+            Employee akoussiviBanitokeFinal = employeeRepository.findByEmail("a.banitoke@orabank.tg").orElse(null);
+            
+            if (essoPitangFinal != null && absenceExceptionnelleRepository.findByEmployeeAndDateDebut(essoPitangFinal, LocalDate.of(2026, 6, 10)).isEmpty()) {
                 log.info("Création des absences exceptionnelles de test...");
                 List<AbsenceExceptionnelle> absences = Arrays.asList(
                     // Absence maladie pour Esso PITANG du 10 au 12 juin 2026
                     AbsenceExceptionnelle.builder()
-                        .employee(essoPitang)
+                        .employee(essoPitangFinal)
                         .dateDebut(LocalDate.of(2026, 6, 10))
                         .dateFin(LocalDate.of(2026, 6, 12))
                         .estDemiJourneeDebut(false)
@@ -354,7 +363,7 @@ public class DataLoader {
                         .build(),
                     // Absence imprévue pour Akoussivi BANITOKE (demi-journée le 15 juin 2026)
                     AbsenceExceptionnelle.builder()
-                        .employee(akoussiviBanitoke)
+                        .employee(akoussiviBanitokeFinal)
                         .dateDebut(LocalDate.of(2026, 6, 15))
                         .dateFin(LocalDate.of(2026, 6, 15))
                         .estDemiJourneeDebut(true)
@@ -369,7 +378,7 @@ public class DataLoader {
                 absenceExceptionnelleRepository.saveAll(absences);
                 log.info("✓ {} absences exceptionnelles créées", absences.size());
             } else {
-                log.info("✓ Les absences exceptionnelles existent déjà");
+                log.info("✓ Les absences exceptionnelles existent déjà ou employés non trouvés");
             }
 
             log.info("=== Chargement des données de test terminé avec succès ===");
