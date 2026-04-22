@@ -18,7 +18,7 @@ export class DashboardComponent implements OnInit {
   stats: DashboardStats | null = null;
   employees: Employee[] = [];
   loading: boolean = false;
-  activeTab: string = 'overview';
+  activeTab: string = 'employees';
   
   // Planning generation
   startDate: string = '';
