@@ -36,8 +36,6 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
-            .addFilterBefore(jwtAuthenticationFilter,
-                UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
@@ -47,6 +45,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().authenticated()
             )
+            .addFilterBefore(jwtAuthenticationFilter,
+                UsernamePasswordAuthenticationFilter.class)
             .exceptionHandling(exc -> exc
                 .authenticationEntryPoint((request, response, authException) -> {
                     String origin = request.getHeader("Origin");
@@ -78,6 +78,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
+        // IMPORTANT: Ne pas utiliser "*" avec allowCredentials(true)
+        // Utiliser uniquement des origins spécifiques
         config.setAllowedOriginPatterns(List.of(
             "https://tfj-planning-frontend.onrender.com",
             "http://localhost:4200",
@@ -88,7 +90,7 @@ public class SecurityConfig {
         ));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(Arrays.asList(
-            "Authorization", "Content-Disposition"
+            "Authorization", "Content-Disposition", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"
         ));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
