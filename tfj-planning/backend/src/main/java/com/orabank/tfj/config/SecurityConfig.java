@@ -36,44 +36,39 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(jwtAuthenticationFilter,
+                UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
-                // OPTIONS (preflight CORS) en premier - OBLIGATOIRE
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                // Health check
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                // Login public
                 .requestMatchers("/api/auth/login").permitAll()
-                // Swagger
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                // Lecture libre
                 .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
-                // Écriture → authentifiée
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().authenticated()
             )
-           .exceptionHandling(exc -> exc
-    .authenticationEntryPoint((request, response, authException) -> {
-        String origin = request.getHeader("Origin");
-        if (origin != null) {
-            response.setHeader("Access-Control-Allow-Origin", origin);
-            response.setHeader("Access-Control-Allow-Credentials", "true");
-        }
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write("{\"error\":\"Non autorisé\"}");
-    })
-    .accessDeniedHandler((request, response, accessDeniedException) -> {
-        String origin = request.getHeader("Origin");
-        if (origin != null) {
-            response.setHeader("Access-Control-Allow-Origin", origin);
-            response.setHeader("Access-Control-Allow-Credentials", "true");
-        }
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write("{\"error\":\"Accès refusé\"}");
-    })
-)
+            .exceptionHandling(exc -> exc
+                .authenticationEntryPoint((request, response, authException) -> {
+                    String origin = request.getHeader("Origin");
+                    if (origin != null) {
+                        response.setHeader("Access-Control-Allow-Origin", origin);
+                        response.setHeader("Access-Control-Allow-Credentials", "true");
+                    }
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"error\":\"Non autorise\"}");
+                })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    String origin = request.getHeader("Origin");
+                    if (origin != null) {
+                        response.setHeader("Access-Control-Allow-Origin", origin);
+                        response.setHeader("Access-Control-Allow-Credentials", "true");
+                    }
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"error\":\"Acces refuse\"}");
+                })
+            )
             .httpBasic(basic -> basic.disable())
             .anonymous(Customizer.withDefaults());
 
@@ -82,29 +77,24 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of(
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOriginPatterns(List.of(
             "https://tfj-planning-frontend.onrender.com",
             "http://localhost:4200",
             "http://localhost:3000"
         ));
-        configuration.setAllowedMethods(Arrays.asList(
+        config.setAllowedMethods(Arrays.asList(
             "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
         ));
-        configuration.setAllowedHeaders(Arrays.asList(
-            "Authorization", "Content-Type", "Accept",
-            "Origin", "X-Requested-With",
-            "Access-Control-Request-Method",
-            "Access-Control-Request-Headers"
-        ));
-        configuration.setExposedHeaders(Arrays.asList(
+        config.setAllowedHeaders(List.of("*"));
+        config.setExposedHeaders(Arrays.asList(
             "Authorization", "Content-Disposition"
         ));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
+        config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 }
