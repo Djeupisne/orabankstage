@@ -3,7 +3,6 @@ import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Employee, DashboardStats } from '../models/index';
-import { AuthService } from './auth.service';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -13,40 +12,40 @@ export class EmployeeService {
   
   private apiUrl = `${environment.apiUrl}/api/employes`;
 
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(private http: HttpClient) {}
 
   getAllEmployees(): Observable<Employee[]> {
-    return this.http.get<Employee[]>(this.apiUrl, { headers: this.authService.getAuthHeaders() }).pipe(
+    return this.http.get<Employee[]>(this.apiUrl).pipe(
       catchError(this.handleError)
     );
   }
 
   getActiveEmployees(): Observable<Employee[]> {
-    return this.http.get<Employee[]>(`${this.apiUrl}/actifs`, { headers: this.authService.getAuthHeaders() }).pipe(
+    return this.http.get<Employee[]>(`${this.apiUrl}/actifs`).pipe(
       catchError(this.handleError)
     );
   }
 
   getEmployeeById(id: number): Observable<Employee> {
-    return this.http.get<Employee>(`${this.apiUrl}/${id}`, { headers: this.authService.getAuthHeaders() }).pipe(
+    return this.http.get<Employee>(`${this.apiUrl}/${id}`).pipe(
       catchError(this.handleError)
     );
   }
 
   createEmployee(employee: Employee): Observable<Employee> {
-    return this.http.post<Employee>(this.apiUrl, employee, { headers: this.authService.getAuthHeaders() }).pipe(
+    return this.http.post<Employee>(this.apiUrl, employee).pipe(
       catchError(this.handleError)
     );
   }
 
   updateEmployee(id: number, employee: Employee): Observable<Employee> {
-    return this.http.put<Employee>(`${this.apiUrl}/${id}`, employee, { headers: this.authService.getAuthHeaders() }).pipe(
+    return this.http.put<Employee>(`${this.apiUrl}/${id}`, employee).pipe(
       catchError(this.handleError)
     );
   }
 
   deleteEmployee(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.authService.getAuthHeaders() }).pipe(
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
       catchError(this.handleError)
     );
   }
@@ -57,9 +56,7 @@ export class EmployeeService {
     if (error.error instanceof ErrorEvent) {
       errorMessage = `Erreur client: ${error.error.message}`;
     } else {
-      if (error.status === 401) {
-        errorMessage = 'Non autorisé. Veuillez vous reconnecter.';
-      } else if (error.error?.message) {
+      if (error.error?.message) {
         errorMessage = error.error.message;
       } else {
         errorMessage = `Erreur serveur (code ${error.status})`;
