@@ -28,8 +28,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, 
                                     HttpServletResponse response, 
                                     FilterChain filterChain) throws ServletException, IOException {
-        // Ne pas traiter les requêtes OPTIONS (CORS preflight)
+        // Ne pas traiter les requêtes OPTIONS (CORS preflight) - CRITICAL
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        
+        // Ne pas traiter les endpoints publics d'authentification
+        String requestURI = request.getRequestURI();
+        if (requestURI.contains("/api/auth/login")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -49,6 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     );
                 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.debug("Set authentication for user: {}", username);
             }
         } catch (Exception ex) {
             log.error("Could not set user authentication in security context", ex);
