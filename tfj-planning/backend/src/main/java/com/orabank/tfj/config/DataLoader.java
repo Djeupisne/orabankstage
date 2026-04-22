@@ -27,7 +27,7 @@ public class DataLoader {
     private final PasswordEncoder passwordEncoder;
 
     @Bean
-    @Profile("dev", "prod")
+    @Profile({"dev", "prod"})
     CommandLineRunner initData(ServiceRepository serviceRepository,
                                 RoleRepository roleRepository,
                                 HierarchicalLevelRepository hierarchicalLevelRepository,

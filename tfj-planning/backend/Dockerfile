@@ -2,15 +2,14 @@
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Copier d'abord les fichiers de configuration pour profiter du cache Docker
+# Copier d'abord pom.xml pour le cache
 COPY pom.xml .
-# Télécharger les dépendances (y compris Lombok)
-RUN mvn dependency:go-offline -B
 
-# Copier le reste du code source
+# Copier le code source
 COPY src ./src
 
-# Compiler avec les annotation processors Lombok
+# Compiler et packager - Maven utilisera automatiquement Lombok comme annotation processor
+# grâce à la configuration dans pom.xml (maven-compiler-plugin avec annotationProcessorPaths)
 RUN mvn clean package -DskipTests -B
 
 # Étape 2 : Exécution avec JDK
