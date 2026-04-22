@@ -86,17 +86,17 @@ public class PlanningAlgorithmService {
             absencesByEmployee.computeIfAbsent(absence.getEmployee().getId(), k -> new ArrayList<>()).add(absence);
         }
         
-        // Grouper les employés par rôle
-        Map<String, List<Employee>> employeesByRole = allActiveEmployees.stream()
-                .collect(Collectors.groupingBy(e -> e.getRole().getName()));
+        // Grouper les employés par service
+        Map<String, List<Employee>> employeesByService = allActiveEmployees.stream()
+                .collect(Collectors.groupingBy(e -> e.getService().getName()));
         
         // Identifier les membres solos et séparer les managers
         Map<Long, Boolean> soloStatusMap = new HashMap<>();
-        Map<String, List<Employee>> nonManagerEmployeesByRole = new HashMap<>();
-        Map<String, List<Employee>> managerEmployeesByRole = new HashMap<>();
+        Map<String, List<Employee>> nonManagerEmployeesByService = new HashMap<>();
+        Map<String, List<Employee>> managerEmployeesByService = new HashMap<>();
         
-        for (Map.Entry<String, List<Employee>> entry : employeesByRole.entrySet()) {
-            String roleName = entry.getKey();
+        for (Map.Entry<String, List<Employee>> entry : employeesByService.entrySet()) {
+            String serviceName = entry.getKey();
             List<Employee> group = entry.getValue();
             
             boolean isSolo = (group.size() == 1);
@@ -118,8 +118,8 @@ public class PlanningAlgorithmService {
                 }
             }
             
-            nonManagerEmployeesByRole.put(roleName, nonManagers);
-            managerEmployeesByRole.put(roleName, managers);
+            nonManagerEmployeesByService.put(serviceName, nonManagers);
+            managerEmployeesByService.put(serviceName, managers);
         }
         
         List<Schedule> generatedSchedules = new ArrayList<>();
@@ -143,7 +143,7 @@ public class PlanningAlgorithmService {
             // TFJ : Lundi à Vendredi
             if (dayOfWeek.getValue() >= DayOfWeek.MONDAY.getValue() && dayOfWeek.getValue() <= DayOfWeek.FRIDAY.getValue()) {
                 totalDaysToPlan++;
-                Schedule schedule = assignTFJ(currentDate, nonManagerEmployeesByRole, managerEmployeesByRole, 
+                Schedule schedule = assignTFJ(currentDate, nonManagerEmployeesByService, managerEmployeesByService, 
                                             soloStatusMap, lastAssignedDay, nonWorkingDays, congesByEmployee, absencesByEmployee);
                 if (schedule != null) {
                     generatedSchedules.add(schedule);
@@ -155,7 +155,7 @@ public class PlanningAlgorithmService {
             // Permanence : Samedi
             else if (dayOfWeek == DayOfWeek.SATURDAY) {
                 totalDaysToPlan++;
-                Schedule schedule = assignPermanence(currentDate, nonManagerEmployeesByRole, managerEmployeesByRole,
+                Schedule schedule = assignPermanence(currentDate, nonManagerEmployeesByService, managerEmployeesByService,
                                                      soloStatusMap, lastAssignedDay, nonWorkingDays, congesByEmployee, absencesByEmployee);
                 if (schedule != null) {
                     generatedSchedules.add(schedule);
@@ -180,8 +180,8 @@ public class PlanningAlgorithmService {
      * Assigne un employé pour les TFJ (Lundi-Vendredi)
      * Priorité aux non-managers, puis managers si insuffisance
      */
-    private Schedule assignTFJ(LocalDate date, Map<String, List<Employee>> nonManagerEmployeesByRole,
-                               Map<String, List<Employee>> managerEmployeesByRole,
+    private Schedule assignTFJ(LocalDate date, Map<String, List<Employee>> nonManagerEmployeesByService,
+                               Map<String, List<Employee>> managerEmployeesByService,
                                Map<Long, Boolean> soloStatusMap, Map<Long, DayOfWeek> lastAssignedDay,
                                List<NonWorkingDay> nonWorkingDays, Map<Long, List<Conge>> congesByEmployee,
                                Map<Long, List<com.orabank.tfj.model.AbsenceExceptionnelle>> absencesByEmployee) {
@@ -198,7 +198,7 @@ public class PlanningAlgorithmService {
         }
         
         // Pour les membres solos : uniquement le vendredi
-        List<Employee> soloNonManagers = nonManagerEmployeesByRole.values().stream()
+        List<Employee> soloNonManagers = nonManagerEmployeesByService.values().stream()
                 .filter(group -> group.size() == 1 && !group.isEmpty())
                 .flatMap(List::stream)
                 .filter(Employee::getActive)
@@ -216,7 +216,7 @@ public class PlanningAlgorithmService {
         }
         
         // Essayer d'abord avec les non-managers
-        Employee selectedEmployee = selectEmployeeFromGroups(nonManagerEmployeesByRole, date, 
+        Employee selectedEmployee = selectEmployeeFromGroups(nonManagerEmployeesByService, date, 
                                                               soloStatusMap, lastAssignedDay, 
                                                               dayOfWeek, congesByEmployee, absencesByEmployee, false);
         
@@ -226,7 +226,7 @@ public class PlanningAlgorithmService {
         
         // Si aucun non-manager disponible, essayer avec les managers
         log.info("Aucun non-manager disponible pour le {}, tentative avec les managers", date);
-        selectedEmployee = selectEmployeeFromGroups(managerEmployeesByRole, date, 
+        selectedEmployee = selectEmployeeFromGroups(managerEmployeesByService, date, 
                                                      soloStatusMap, lastAssignedDay, 
                                                      dayOfWeek, congesByEmployee, absencesByEmployee, true);
         
@@ -242,14 +242,14 @@ public class PlanningAlgorithmService {
      * Assigne un employé pour la permanence (Samedi)
      * Priorité aux non-managers, puis managers si insuffisance
      */
-    private Schedule assignPermanence(LocalDate date, Map<String, List<Employee>> nonManagerEmployeesByRole,
-                                      Map<String, List<Employee>> managerEmployeesByRole,
+    private Schedule assignPermanence(LocalDate date, Map<String, List<Employee>> nonManagerEmployeesByService,
+                                      Map<String, List<Employee>> managerEmployeesByService,
                                       Map<Long, Boolean> soloStatusMap, Map<Long, DayOfWeek> lastAssignedDay,
                                       List<NonWorkingDay> nonWorkingDays, Map<Long, List<Conge>> congesByEmployee,
                                       Map<Long, List<com.orabank.tfj.model.AbsenceExceptionnelle>> absencesByEmployee) {
         
         // Les membres solos peuvent être programmés le samedi
-        List<Employee> soloNonManagers = nonManagerEmployeesByRole.values().stream()
+        List<Employee> soloNonManagers = nonManagerEmployeesByService.values().stream()
                 .filter(group -> group.size() == 1 && !group.isEmpty())
                 .flatMap(List::stream)
                 .filter(Employee::getActive)
@@ -267,7 +267,7 @@ public class PlanningAlgorithmService {
         }
         
         // Essayer avec les autres non-managers
-        Employee selectedEmployee = selectEmployeeFromGroups(nonManagerEmployeesByRole, date,
+        Employee selectedEmployee = selectEmployeeFromGroups(nonManagerEmployeesByService, date,
                                                               soloStatusMap, lastAssignedDay,
                                                               DayOfWeek.SATURDAY, congesByEmployee, absencesByEmployee, false);
         
@@ -277,7 +277,7 @@ public class PlanningAlgorithmService {
         
         // Si aucun non-manager disponible, essayer avec les managers
         log.info("Aucun non-manager disponible pour la permanence du {}, tentative avec les managers", date);
-        selectedEmployee = selectEmployeeFromGroups(managerEmployeesByRole, date,
+        selectedEmployee = selectEmployeeFromGroups(managerEmployeesByService, date,
                                                      soloStatusMap, lastAssignedDay,
                                                      DayOfWeek.SATURDAY, congesByEmployee, absencesByEmployee, true);
         
@@ -292,7 +292,7 @@ public class PlanningAlgorithmService {
     /**
      * Sélectionne un employé à partir des groupes en appliquant la rotation et en vérifiant les congés
      */
-    private Employee selectEmployeeFromGroups(Map<String, List<Employee>> employeesByRole, LocalDate date,
+    private Employee selectEmployeeFromGroups(Map<String, List<Employee>> employeesByService, LocalDate date,
                                                Map<Long, Boolean> soloStatusMap, Map<Long, DayOfWeek> lastAssignedDay,
                                                DayOfWeek targetDay, Map<Long, List<Conge>> congesByEmployee,
                                                Map<Long, List<com.orabank.tfj.model.AbsenceExceptionnelle>> absencesByEmployee,
@@ -300,7 +300,7 @@ public class PlanningAlgorithmService {
         
         List<Employee> eligibleEmployees = new ArrayList<>();
         
-        for (List<Employee> group : employeesByRole.values()) {
+        for (List<Employee> group : employeesByService.values()) {
             if (group.isEmpty()) continue;
             
             // Pour les groupes non-solos ou si c'est vendredi/samedi pour les solos
@@ -523,7 +523,6 @@ public class PlanningAlgorithmService {
                 .employeeId(emp.getId())
                 .employeeFullName(emp.getFullName())
                 .employeeEmail(emp.getEmail())
-                .roleName(emp.getRole().getName())
                 .serviceName(emp.getService().getName())
                 .date(schedule.getDate())
                 .dayOfWeek(schedule.getDayOfWeek())
