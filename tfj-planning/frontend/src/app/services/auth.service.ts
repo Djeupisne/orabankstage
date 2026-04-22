@@ -63,7 +63,7 @@ export class AuthService {
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
-    let errorMessage = 'Une erreur inconnue s\\'est produite';
+    let errorMessage = 'Une erreur inconnue est survenue';
     
     if (error.error instanceof ErrorEvent) {
       errorMessage = `Erreur client: ${error.error.message}`;

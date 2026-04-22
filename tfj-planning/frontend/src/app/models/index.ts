@@ -7,6 +7,7 @@ export interface User {
   createdAt?: string;
   employeeId?: number;
   employeeFullName?: string;
+  fullName?: string;
 }
 
 export interface LoginRequest {
