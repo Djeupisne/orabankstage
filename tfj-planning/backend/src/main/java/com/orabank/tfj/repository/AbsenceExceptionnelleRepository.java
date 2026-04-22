@@ -45,4 +45,9 @@ public interface AbsenceExceptionnelleRepository extends JpaRepository<AbsenceEx
      * Trouve les absences d'un employé triées par date de début
      */
     List<AbsenceExceptionnelle> findByEmployeeIdOrderByDateDebutDesc(Long employeeId);
+
+    /**
+     * Trouve une absence exceptionnelle par employé et date de début
+     */
+    List<AbsenceExceptionnelle> findByEmployeeAndDateDebut(com.orabank.tfj.model.Employee employee, LocalDate dateDebut);
 }

@@ -95,57 +95,135 @@ public class DataLoader {
                 log.info("✓ L'utilisateur administrateur existe déjà");
             }
 
-            // Charger les autres données seulement si la base est vide
-            if (serviceRepository.count() <= 3) {
-                log.info("Insertion des données de référence...");
-                
-                // 1. Services DSI
-                List<Service> services = Arrays.asList(
-                    Service.builder().name("Applications").description("Service des applications métier").build(),
-                    Service.builder().name("Infrastructure").description("Service infrastructure réseau et système").build(),
-                    Service.builder().name("Exploitation").description("Service exploitation et maintenance").build()
-                );
-                serviceRepository.saveAll(services);
-                log.info("✓ {} services créés", services.size());
+            // Charger les données de référence (vérification individuelle pour éviter les doublons)
+            log.info("Insertion des données de référence (si elles n'existent pas déjà)...");
+            
+            // 1. Services DSI - création seulement si n'existe pas
+            Service applicationsService = serviceRepository.findByName("Applications")
+                .orElseGet(() -> {
+                    log.info("Création du service 'Applications'...");
+                    return serviceRepository.save(Service.builder()
+                        .name("Applications")
+                        .description("Service des applications métier")
+                        .build());
+                });
+            
+            Service infrastructureService = serviceRepository.findByName("Infrastructure")
+                .orElseGet(() -> {
+                    log.info("Création du service 'Infrastructure'...");
+                    return serviceRepository.save(Service.builder()
+                        .name("Infrastructure")
+                        .description("Service infrastructure réseau et système")
+                        .build());
+                });
+            
+            Service exploitationService = serviceRepository.findByName("Exploitation")
+                .orElseGet(() -> {
+                    log.info("Création du service 'Exploitation'...");
+                    return serviceRepository.save(Service.builder()
+                        .name("Exploitation")
+                        .description("Service exploitation et maintenance")
+                        .build());
+                });
+            
+            long serviceCount = serviceRepository.count();
+            log.info("✓ {} services disponibles", serviceCount);
 
-                // 2. Rôles / fiches de poste
-                List<Role> roles = Arrays.asList(
-                    Role.builder().name("Administrateur réseau").description("Gestion et administration du réseau").build(),
-                    Role.builder().name("Développeur").description("Développement des applications métier").build(),
-                    Role.builder().name("Administrateur système").description("Administration des systèmes et serveurs").build(),
-                    Role.builder().name("DBA").description("Administration des bases de données").build(),
-                    Role.builder().name("Chef de projet").description("Gestion de projets informatiques").build(),
-                    Role.builder().name("Technicien support").description("Support utilisateur et maintenance").build()
-                );
-                roleRepository.saveAll(roles);
-                log.info("✓ {} rôles créés", roles.size());
+            // 2. Rôles / fiches de poste - création seulement si n'existe pas
+            Role adminReseauRole = roleRepository.findByName("Administrateur réseau")
+                .orElseGet(() -> {
+                    log.info("Création du rôle 'Administrateur réseau'...");
+                    return roleRepository.save(Role.builder()
+                        .name("Administrateur réseau")
+                        .description("Gestion et administration du réseau")
+                        .build());
+                });
+            
+            Role developpeurRole = roleRepository.findByName("Développeur")
+                .orElseGet(() -> {
+                    log.info("Création du rôle 'Développeur'...");
+                    return roleRepository.save(Role.builder()
+                        .name("Développeur")
+                        .description("Développement des applications métier")
+                        .build());
+                });
+            
+            Role adminSystemeRole = roleRepository.findByName("Administrateur système")
+                .orElseGet(() -> {
+                    log.info("Création du rôle 'Administrateur système'...");
+                    return roleRepository.save(Role.builder()
+                        .name("Administrateur système")
+                        .description("Administration des systèmes et serveurs")
+                        .build());
+                });
+            
+            Role dbaRole = roleRepository.findByName("DBA")
+                .orElseGet(() -> {
+                    log.info("Création du rôle 'DBA'...");
+                    return roleRepository.save(Role.builder()
+                        .name("DBA")
+                        .description("Administration des bases de données")
+                        .build());
+                });
+            
+            Role chefProjetRole = roleRepository.findByName("Chef de projet")
+                .orElseGet(() -> {
+                    log.info("Création du rôle 'Chef de projet'...");
+                    return roleRepository.save(Role.builder()
+                        .name("Chef de projet")
+                        .description("Gestion de projets informatiques")
+                        .build());
+                });
+            
+            Role technicienRole = roleRepository.findByName("Technicien support")
+                .orElseGet(() -> {
+                    log.info("Création du rôle 'Technicien support'...");
+                    return roleRepository.save(Role.builder()
+                        .name("Technicien support")
+                        .description("Support utilisateur et maintenance")
+                        .build());
+                });
+            
+            long roleCount = roleRepository.count();
+            log.info("✓ {} rôles disponibles", roleCount);
 
-                // 3. Niveaux hiérarchiques
-                List<HierarchicalLevel> levels = Arrays.asList(
-                    HierarchicalLevel.builder().name("Collaborateur").description("Niveau collaborateur").levelOrder(1).build(),
-                    HierarchicalLevel.builder().name("Cadre").description("Niveau cadre").levelOrder(2).build(),
-                    HierarchicalLevel.builder().name("Manager").description("Niveau manager").levelOrder(3).build()
-                );
-                hierarchicalLevelRepository.saveAll(levels);
-                log.info("✓ {} niveaux hiérarchiques créés", levels.size());
+            // 3. Niveaux hiérarchiques - création seulement si n'existe pas
+            HierarchicalLevel collaborateurLevel = hierarchicalLevelRepository.findByName("Collaborateur")
+                .orElseGet(() -> {
+                    log.info("Création du niveau 'Collaborateur'...");
+                    return hierarchicalLevelRepository.save(HierarchicalLevel.builder()
+                        .name("Collaborateur")
+                        .description("Niveau collaborateur")
+                        .levelOrder(1)
+                        .build());
+                });
+            
+            HierarchicalLevel cadreLevel = hierarchicalLevelRepository.findByName("Cadre")
+                .orElseGet(() -> {
+                    log.info("Création du niveau 'Cadre'...");
+                    return hierarchicalLevelRepository.save(HierarchicalLevel.builder()
+                        .name("Cadre")
+                        .description("Niveau cadre")
+                        .levelOrder(2)
+                        .build());
+                });
+            
+            HierarchicalLevel managerLevel = hierarchicalLevelRepository.findByName("Manager")
+                .orElseGet(() -> {
+                    log.info("Création du niveau 'Manager'...");
+                    return hierarchicalLevelRepository.save(HierarchicalLevel.builder()
+                        .name("Manager")
+                        .description("Niveau manager")
+                        .levelOrder(3)
+                        .build());
+                });
+            
+            long levelCount = hierarchicalLevelRepository.count();
+            log.info("✓ {} niveaux hiérarchiques disponibles", levelCount);
 
-                // Récupérer les entités pour les employés
-                Service applicationsService = serviceRepository.findByName("Applications").get();
-                Service infrastructureService = serviceRepository.findByName("Infrastructure").get();
-                Service exploitationService = serviceRepository.findByName("Exploitation").get();
-                
-                Role developpeurRole = roleRepository.findByName("Développeur").get();
-                Role adminReseauRole = roleRepository.findByName("Administrateur réseau").get();
-                Role adminSystemeRole = roleRepository.findByName("Administrateur système").get();
-                Role dbaRole = roleRepository.findByName("DBA").get();
-                Role chefProjetRole = roleRepository.findByName("Chef de projet").get();
-                Role technicienRole = roleRepository.findByName("Technicien support").get();
-                
-                HierarchicalLevel collaborateurLevel = hierarchicalLevelRepository.findByName("Collaborateur").get();
-                HierarchicalLevel cadreLevel = hierarchicalLevelRepository.findByName("Cadre").get();
-                HierarchicalLevel managerLevel = hierarchicalLevelRepository.findByName("Manager").get();
-
-                // 4. Employés - Service Applications
+            // 4. Employés - création seulement si n'existe pas (vérification par email)
+            if (employeeRepository.findByEmail("k.amenyonor@orabank.tg").isEmpty()) {
+                log.info("Création des employés...");
                 List<Employee> employees = Arrays.asList(
                     // Applications
                     Employee.builder().firstName("Kofi").lastName("AMENYONOR").email("k.amenyonor@orabank.tg")
@@ -182,8 +260,20 @@ public class DataLoader {
                 );
                 employeeRepository.saveAll(employees);
                 log.info("✓ {} employés créés", employees.size());
+            } else {
+                log.info("✓ Les employés existent déjà");
+            }
 
-                // 5. Jours fériés 2026
+            // Récupérer les employés pour les congés et absences
+            Employee kofiAmenyonor = employeeRepository.findByEmail("k.amenyonor@orabank.tg").orElse(null);
+            Employee follyGanou = employeeRepository.findByEmail("f.ganou@orabank.tg").orElse(null);
+            Employee amaTchassan = employeeRepository.findByEmail("a.tchassan@orabank.tg").orElse(null);
+            Employee essoPitang = employeeRepository.findByEmail("e.pitang@orabank.tg").orElse(null);
+            Employee akoussiviBanitoke = employeeRepository.findByEmail("a.banitoke@orabank.tg").orElse(null);
+
+            // 5. Jours fériés 2026 - création seulement si n'existe pas (vérification par date)
+            if (nonWorkingDayRepository.findByDate(LocalDate.of(2026, 1, 1)).isEmpty()) {
+                log.info("Création des jours fériés 2026...");
                 List<NonWorkingDay> nonWorkingDays = Arrays.asList(
                     NonWorkingDay.builder().date(LocalDate.of(2026, 1, 1)).name("Jour de l'an").type(NonWorkingDay.NonWorkingDayType.FULL_DAY).build(),
                     NonWorkingDay.builder().date(LocalDate.of(2026, 1, 13)).name("Fête du Ramadan").type(NonWorkingDay.NonWorkingDayType.FULL_DAY).build(),
@@ -203,12 +293,13 @@ public class DataLoader {
                 );
                 nonWorkingDayRepository.saveAll(nonWorkingDays);
                 log.info("✓ {} jours fériés créés", nonWorkingDays.size());
+            } else {
+                log.info("✓ Les jours fériés existent déjà");
+            }
 
-                // 6. Congés de test
-                Employee kofiAmenyonor = employeeRepository.findByEmail("k.amenyonor@orabank.tg").get();
-                Employee follyGanou = employeeRepository.findByEmail("f.ganou@orabank.tg").get();
-                Employee amaTchassan = employeeRepository.findByEmail("a.tchassan@orabank.tg").get();
-                
+            // 6. Congés de test - création seulement si n'existe pas
+            if (kofiAmenyonor != null && congeRepository.findByEmployeeAndDateDebut(kofiAmenyonor, LocalDate.of(2026, 6, 15)).isEmpty()) {
+                log.info("Création des congés de test...");
                 List<Conge> conges = Arrays.asList(
                     // Congé annuel pour Kofi AMENYONOR du 15 au 19 juin 2026
                     Conge.builder()
@@ -240,11 +331,13 @@ public class DataLoader {
                 );
                 congeRepository.saveAll(conges);
                 log.info("✓ {} congés créés", conges.size());
+            } else {
+                log.info("✓ Les congés de test existent déjà");
+            }
 
-                // 7. Absences exceptionnelles de test
-                Employee essoPitang = employeeRepository.findByEmail("e.pitang@orabank.tg").get();
-                Employee akoussiviBanitoke = employeeRepository.findByEmail("a.banitoke@orabank.tg").get();
-                
+            // 7. Absences exceptionnelles de test - création seulement si n'existe pas
+            if (essoPitang != null && absenceExceptionnelleRepository.findByEmployeeAndDateDebut(essoPitang, LocalDate.of(2026, 6, 10)).isEmpty()) {
+                log.info("Création des absences exceptionnelles de test...");
                 List<AbsenceExceptionnelle> absences = Arrays.asList(
                     // Absence maladie pour Esso PITANG du 10 au 12 juin 2026
                     AbsenceExceptionnelle.builder()
@@ -275,20 +368,20 @@ public class DataLoader {
                 );
                 absenceExceptionnelleRepository.saveAll(absences);
                 log.info("✓ {} absences exceptionnelles créées", absences.size());
-
-                log.info("=== Chargement des données de test terminé avec succès ===");
-                log.info("");
-                log.info("╔════════════════════════════════════════════════════════╗");
-                log.info("║         IDENTIFIANTS DE CONNEXION                      ║");
-                log.info("╠════════════════════════════════════════════════════════╣");
-                log.info("║  Identifiant : admin                                   ║");
-                log.info("║  Mot de passe  : Admin123!                             ║");
-                log.info("║  Rôle          : ADMIN                                 ║");
-                log.info("╚════════════════════════════════════════════════════════╝");
-                log.info("");
             } else {
-                log.info("✓ Les données de référence existent déjà");
+                log.info("✓ Les absences exceptionnelles existent déjà");
             }
+
+            log.info("=== Chargement des données de test terminé avec succès ===");
+            log.info("");
+            log.info("╔════════════════════════════════════════════════════════╗");
+            log.info("║         IDENTIFIANTS DE CONNEXION                      ║");
+            log.info("╠════════════════════════════════════════════════════════╣");
+            log.info("║  Identifiant : admin                                   ║");
+            log.info("║  Mot de passe  : Admin123!                             ║");
+            log.info("║  Rôle          : ADMIN                                 ║");
+            log.info("╚════════════════════════════════════════════════════════╝");
+            log.info("");
         };
     }
 }
