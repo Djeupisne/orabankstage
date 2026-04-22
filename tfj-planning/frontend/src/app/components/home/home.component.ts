@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { PlanningService } from '../../services/planning.service';
-import { AuthService } from '../../services/auth.service';
 import { Schedule } from '../../models/schedule';
 import { TranslateDayPipe } from '../../pipes/translate-day.pipe';
 
@@ -22,15 +21,12 @@ export class HomeComponent implements OnInit {
   error: string = '';
   successMessage: string = '';
   showPlanningSection: boolean = false;
-  isAdmin: boolean = false;
-
+  
   constructor(
-    private planningService: PlanningService,
-    private authService: AuthService
+    private planningService: PlanningService
   ) {}
 
   ngOnInit(): void {
-    this.isAdmin = this.authService.isAdmin();
     // Set default dates (current week)
     const today = new Date();
     const monday = this.getMonday(today);
