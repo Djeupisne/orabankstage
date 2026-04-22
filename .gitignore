@@ -1,3 +1,39 @@
-Nothing should be ignored in this case, as the only modified file is a Java source code file (`SecurityConfig.java`) which is part of the actual source code and not a build artifact, dependency, or temporary file. The change list contains only source code files, so according to rule #6, the .gitignore should remain empty.
+# Dependencies
+target/
+.gradle/
 
-(empty — output nothing)
+# Compiled files
+*.class
+*.jar
+*.war
+*.ear
+
+# IDE
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Python (if applicable)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.PyInstaller/
+venv/
+.venv/
+.mypy_cache/
+.pytest_cache/
