@@ -3,7 +3,7 @@ package com.orabank.tfj.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpMethod;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,13 +19,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Configuration de sécurité pour l'environnement de production.
- * - Authentification par JWT via la base de données
- * - Autorisations basées sur les rôles
- * - CORS ouvert pour le frontend
- * - CSRF désactivé pour API REST
- */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -45,62 +38,67 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
-                // Endpoints publics pour le monitoring
+                // OPTIONS (preflight CORS) en premier - OBLIGATOIRE
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // Health check
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                // Swagger et API docs
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
-                // Endpoints d'authentification publics (login) - DOIT ETRE AVANT TOUT AUTRE /api/**
+                // Login public
                 .requestMatchers("/api/auth/login").permitAll()
-                // API ouverte en lecture seule pour le frontend - GET uniquement
-                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/**").permitAll()
-                // Autres méthodes HTTP sur API nécessitent authentification
+                // Swagger
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                // Lecture libre
+                .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
+                // Écriture → authentifiée
                 .requestMatchers("/api/**").authenticated()
-                // Tout le reste nécessite authentification
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((request, response, authException) -> {
+                    String origin = request.getHeader("Origin");
+                    if (origin != null) {
+                        response.setHeader("Access-Control-Allow-Origin", origin);
+                        response.setHeader("Access-Control-Allow-Credentials", "true");
+                    }
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json");
-                    response.getWriter().write("{\"error\": \"Non autorisé\", \"message\": \"" + authException.getMessage() + "\"}");
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"error\":\"Non autorisé\"}");
                 })
-                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                .accessDeniedHandler((request, response, ex) -> {
+                    String origin = request.getHeader("Origin");
+                    if (origin != null) {
+                        response.setHeader("Access-Control-Allow-Origin", origin);
+                        response.setHeader("Access-Control-Allow-Credentials", "true");
+                    }
                     response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    response.setContentType("application/json");
-                    response.getWriter().write("{\"error\": \"Accès refusé\", \"message\": \"" + accessDeniedException.getMessage() + "\"}");
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"error\":\"Accès refusé\"}");
                 })
             )
             .httpBasic(basic -> basic.disable())
             .anonymous(Customizer.withDefaults());
-        
+
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
-        // Autoriser TOUS les domaines en mode développement/test
-        // En production, restreindre aux domaines autorisés
-        configuration.setAllowedOrigins(List.of(
+        configuration.setAllowedOriginPatterns(List.of(
             "https://tfj-planning-frontend.onrender.com",
-            "http://localhost:3000",
-            "http://localhost:8080",
-            "http://localhost:4200"
+            "http://localhost:4200",
+            "http://localhost:3000"
         ));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedMethods(Arrays.asList(
+            "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
+        ));
         configuration.setAllowedHeaders(Arrays.asList(
-            "Authorization",
-            "Content-Type",
-            "X-Requested-With",
-            "Accept",
-            "Origin",
+            "Authorization", "Content-Type", "Accept",
+            "Origin", "X-Requested-With",
             "Access-Control-Request-Method",
             "Access-Control-Request-Headers"
         ));
         configuration.setExposedHeaders(Arrays.asList(
-            "Authorization",
-            "Content-Disposition"
+            "Authorization", "Content-Disposition"
         ));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
