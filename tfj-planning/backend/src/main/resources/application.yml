@@ -69,3 +69,12 @@ logging:
     org.springframework.boot.web.embedded.tomcat: WARN
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
+
+# Configuration CORS explicite pour Spring Boot
+cors:
+  allowed:
+    origins: "*"
+    methods: "GET,POST,PUT,DELETE,OPTIONS,PATCH"
+    headers: "*"
+    exposed-headers: "Authorization,Content-Disposition,Access-Control-Allow-Origin,Access-Control-Allow-Credentials"
+    max-age: 3600
