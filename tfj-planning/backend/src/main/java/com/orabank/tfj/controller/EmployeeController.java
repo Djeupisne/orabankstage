@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/employes")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 @Tag(name = "Employés", description = "API de gestion des employés")
 public class EmployeeController {
     

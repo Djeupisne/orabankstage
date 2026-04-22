@@ -19,7 +19,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/planning")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 @Tag(name = "Planning", description = "API de génération et consultation des plannings")
 public class PlanningController {
     
