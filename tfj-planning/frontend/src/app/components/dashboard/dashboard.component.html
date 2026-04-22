@@ -28,9 +28,6 @@
       >
         🔐 Utilisateurs
       </a>
-      <a routerLink="/home" class="nav-item">
-        🏠 Accueil
-      </a>
       <a 
         [class.active]="activeTab === 'planning'" 
         (click)="setActiveTab('planning')"
@@ -39,22 +36,12 @@
         📅 Générer Planning
       </a>
     </nav>
-
-    <div class="sidebar-footer">
-      <button (click)="logout()" class="btn-logout">
-        🚪 Déconnexion
-      </button>
-    </div>
   </aside>
 
   <!-- Main Content -->
   <main class="main-content">
     <header class="top-bar">
       <h1>Tableau de Bord Administrateur</h1>
-      <div class="user-info">
-        <span>{{ authService.getCurrentUser()?.fullName || authService.getCurrentUser()?.username }}</span>
-        <span class="badge">{{ authService.getCurrentUser()?.role }}</span>
-      </div>
     </header>
 
     <div class="content">

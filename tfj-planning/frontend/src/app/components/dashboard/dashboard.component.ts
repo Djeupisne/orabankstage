@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
 import { DashboardService, EmployeeService } from '../../services/employee.service';
 import { PlanningService } from '../../services/planning.service';
 import { DashboardStats, Employee, User, Schedule } from '../../models/index';
@@ -34,7 +33,6 @@ export class DashboardComponent implements OnInit {
   showPlanningSection: boolean = false;
 
   constructor(
-    public authService: AuthService,
     private dashboardService: DashboardService,
     private employeeService: EmployeeService,
     private planningService: PlanningService,
@@ -42,10 +40,6 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    if (!this.authService.isAdmin()) {
-      this.router.navigate(['/home']);
-      return;
-    }
     this.loadDashboardStats();
     this.loadEmployees();
     this.loadUsers();
@@ -88,11 +82,6 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/home']);
-  }
-
   setActiveTab(tab: string): void {
     this.activeTab = tab;
   }
@@ -116,15 +105,8 @@ export class DashboardComponent implements OnInit {
 
   deleteUser(id: number): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
-      this.authService.deleteUser(id).subscribe({
-        next: () => {
-          this.loadUsers();
-          this.loadDashboardStats();
-        },
-        error: (err: any) => {
-          console.error('Erreur suppression:', err);
-        }
-      });
+      // Note: deleteUser functionality removed with auth service
+      console.log('Delete user functionality not available');
     }
   }
 

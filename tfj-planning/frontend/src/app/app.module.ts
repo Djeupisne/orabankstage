@@ -4,21 +4,12 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { provideRouter, Routes } from '@angular/router';
 
 import { AppComponent } from './app.component';
-import { LoginComponent } from './components/login/login.component';
-import { HomeComponent } from './components/home/home.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { AuthGuard, AdminGuard } from './guards/auth.guard';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/home', pathMatch: 'full' },
-  { path: 'home', component: HomeComponent },
-  { path: 'login', component: LoginComponent },
-  { 
-    path: 'dashboard', 
-    component: DashboardComponent,
-    canActivate: [AuthGuard]
-  },
-  { path: '**', redirectTo: '/home' }
+  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+  { path: 'dashboard', component: DashboardComponent },
+  { path: '**', redirectTo: '/dashboard' }
 ];
 
 @NgModule({
@@ -26,15 +17,11 @@ const routes: Routes = [
   imports: [
     BrowserModule,
     AppComponent,
-    LoginComponent,
-    HomeComponent,
     DashboardComponent
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),
-    provideRouter(routes),
-    AuthGuard,
-    AdminGuard
+    provideRouter(routes)
   ],
   bootstrap: []
 })

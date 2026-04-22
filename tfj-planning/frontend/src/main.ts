@@ -4,14 +4,12 @@ import { provideRouter } from '@angular/router';
 import { Routes } from '@angular/router';
 
 import { AppComponent } from './app/app.component';
-import { HomeComponent } from './app/components/home/home.component';
 import { DashboardComponent } from './app/components/dashboard/dashboard.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/home', pathMatch: 'full' },
-  { path: 'home', component: HomeComponent },
+  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
   { path: 'dashboard', component: DashboardComponent },
-  { path: '**', redirectTo: '/home' }
+  { path: '**', redirectTo: '/dashboard' }
 ];
 
 bootstrapApplication(AppComponent, {
