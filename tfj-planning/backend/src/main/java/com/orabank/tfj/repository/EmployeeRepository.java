@@ -15,8 +15,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Query("SELECT e FROM Employee e ORDER BY e.lastName, e.firstName")
     List<Employee> findAllByOrderByLastNameFirstName();
     
-    List<Employee> findByRoleIdAndActiveTrue(Long roleId);
-    
     List<Employee> findByServiceIdAndActiveTrue(Long serviceId);
     
     @Query("SELECT e FROM Employee e WHERE e.active = true AND e.isSoloInGroup = :isSolo")
