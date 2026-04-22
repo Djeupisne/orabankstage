@@ -51,6 +51,8 @@ public class SecurityConfigProd {
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                 // Swagger et API docs désactivés en prod
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").denyAll()
+                // Requêtes OPTIONS (CORS preflight) - DOIT ETRE AVANT TOUT AUTRE
+                .requestMatchers("OPTIONS", "/**").permitAll()
                 // Endpoints d'authentification publics (login) - DOIT ETRE AVANT TOUT AUTRE /api/**
                 .requestMatchers("/api/auth/login").permitAll()
                 // API ouverte en lecture seule pour le frontend - GET uniquement
@@ -82,8 +84,12 @@ public class SecurityConfigProd {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Autoriser tous les domaines en production (à restreindre si nécessaire)
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        // Autoriser le domaine du frontend en production
+        configuration.setAllowedOriginPatterns(List.of(
+            "https://tfj-planning-frontend.onrender.com",
+            "http://localhost:3000",
+            "http://localhost:8080"
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList(
             "Authorization",
