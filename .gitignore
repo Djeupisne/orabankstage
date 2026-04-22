@@ -1,61 +1,47 @@
 ```
-# Environment files
+# Compiled and build artifacts
+*.class
+*.o
+*.obj
+*.out
+target/
+
+# Dependencies
+.m2/
+.gradle/
+node_modules/
+venv/
+.venv/
+__pycache__/
+*.egg-info/
+dist/
+build/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Environment
 .env
 .env.local
 *.env.*
 
-# IDE and editor files
+# Editors
 .vscode/
 .idea/
-*.swp
-*.swo
-*.tmp
+*.iml
+*.ipr
+*.iws
 
-# Logs
-*.log
-
-# Build outputs
-dist/
-build/
-target/
-
-# Dependencies
-node_modules/
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Coverage reports
-coverage/
-htmlcov/
-*.coverage
-
-# OS generated files
+# OS specific
 .DS_Store
 Thumbs.db
 
-# Compressed files
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
+# Java specific
+*.jar
+*.war
+*.ear
+!src/**/*
 ```
