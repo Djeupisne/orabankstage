@@ -42,5 +42,6 @@ server:
       timeout: 30m
   compression:
     enabled: true
+  forward-headers-strategy: framework
 
 logging:
