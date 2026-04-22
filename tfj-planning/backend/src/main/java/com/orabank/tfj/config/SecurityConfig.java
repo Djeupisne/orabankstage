@@ -37,16 +37,14 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/login").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                .requestMatchers("/api/auth/login").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtAuthenticationFilter,
-                UsernamePasswordAuthenticationFilter.class)
             .exceptionHandling(exc -> exc
                 .authenticationEntryPoint((request, response, authException) -> {
                     String origin = request.getHeader("Origin");
@@ -72,6 +70,10 @@ public class SecurityConfig {
             .httpBasic(basic -> basic.disable())
             .anonymous(Customizer.withDefaults());
 
+        // IMPORTANT: Ajouter le filtre JWT APRES la configuration d'autorisation
+        http.addFilterBefore(jwtAuthenticationFilter,
+            UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
@@ -96,6 +98,7 @@ public class SecurityConfig {
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // Appliquer la configuration CORS à TOUS les endpoints
         source.registerCorsConfiguration("/**", config);
         return source;
     }

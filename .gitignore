@@ -1,3 +1,4 @@
+```
 # Compiled and build artifacts
 *.class
 *.o
@@ -14,6 +15,7 @@ __pycache__/
 .mypy_cache/
 .pytest_cache/
 .gradle/
+target/
 
 # Logs and temp files
 *.log
@@ -29,7 +31,7 @@ __pycache__/
 .vscode/
 .idea/
 
-# System files
+# OS specific
 .DS_Store
 Thumbs.db
 
@@ -38,7 +40,7 @@ coverage/
 htmlcov/
 .coverage
 
-# Archives
+# Compressed files
 *.zip
 *.gz
 *.tar
@@ -61,3 +63,4 @@ htmlcov/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
+```
