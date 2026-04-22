@@ -1,32 +1,28 @@
+```
 # Compiled and build artifacts
 *.class
 *.o
 *.obj
-*.out
+*.exe
 *.dll
 *.so
 *.a
-*.pyc
-__pycache__/
+*.out
+target/
 
 # Dependencies
 node_modules/
 venv/
 .venv/
-.julia/
-zig*/
-target/
-.gradle/
+__pycache__/
 .mypy_cache/
 .pytest_cache/
-dist/
-build/
+.gradle/
 
 # Logs and temp files
 *.log
 *.tmp
 *.swp
-*.swo
 
 # Environment
 .env
@@ -37,7 +33,7 @@ build/
 .vscode/
 .idea/
 
-# System
+# System files
 .DS_Store
 Thumbs.db
 
@@ -69,3 +65,4 @@ htmlcov/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
+```
