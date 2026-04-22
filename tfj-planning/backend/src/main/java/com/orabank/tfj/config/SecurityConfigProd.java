@@ -51,12 +51,10 @@ public class SecurityConfigProd {
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                 // Swagger et API docs désactivés en prod
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").denyAll()
-                // Requêtes OPTIONS (CORS preflight) - DOIT ETRE AVANT TOUT AUTRE
-                .requestMatchers("OPTIONS", "/**").permitAll()
                 // Endpoints d'authentification publics (login) - DOIT ETRE AVANT TOUT AUTRE /api/**
                 .requestMatchers("/api/auth/login").permitAll()
                 // API ouverte en lecture seule pour le frontend - GET uniquement
-                .requestMatchers("GET", "/api/**").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/**").permitAll()
                 // Autres méthodes HTTP sur API nécessitent authentification
                 .requestMatchers("/api/**").authenticated()
                 // Tout le reste nécessite authentification
