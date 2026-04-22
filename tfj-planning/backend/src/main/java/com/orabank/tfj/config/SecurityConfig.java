@@ -48,9 +48,11 @@ public class SecurityConfig {
             .exceptionHandling(exc -> exc
                 .authenticationEntryPoint((request, response, authException) -> {
                     String origin = request.getHeader("Origin");
-                    if (origin != null) {
+                    if (origin != null && !origin.isEmpty()) {
                         response.setHeader("Access-Control-Allow-Origin", origin);
                         response.setHeader("Access-Control-Allow-Credentials", "true");
+                        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
+                        response.setHeader("Access-Control-Allow-Headers", "*");
                     }
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.setContentType("application/json;charset=UTF-8");
@@ -58,9 +60,11 @@ public class SecurityConfig {
                 })
                 .accessDeniedHandler((request, response, accessDeniedException) -> {
                     String origin = request.getHeader("Origin");
-                    if (origin != null) {
+                    if (origin != null && !origin.isEmpty()) {
                         response.setHeader("Access-Control-Allow-Origin", origin);
                         response.setHeader("Access-Control-Allow-Credentials", "true");
+                        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
+                        response.setHeader("Access-Control-Allow-Headers", "*");
                     }
                     response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                     response.setContentType("application/json;charset=UTF-8");
@@ -101,5 +105,33 @@ public class SecurityConfig {
         // Appliquer la configuration CORS à TOUS les endpoints
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+    
+    /**
+     * Configuration CORS supplémentaire pour Spring MVC
+     * Cette configuration s'applique avant le filtre de sécurité Spring Security
+     */
+    @Bean
+    public org.springframework.web.filter.CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        
+        config.setAllowedOriginPatterns(List.of(
+            "https://tfj-planning-frontend.onrender.com",
+            "http://localhost:4200",
+            "http://localhost:3000"
+        ));
+        config.setAllowedMethods(Arrays.asList(
+            "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
+        ));
+        config.setAllowedHeaders(List.of("*"));
+        config.setExposedHeaders(Arrays.asList(
+            "Authorization", "Content-Disposition", "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"
+        ));
+        config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
+        
+        source.registerCorsConfiguration("/**", config);
+        return new org.springframework.web.filter.CorsFilter(source);
     }
 }
