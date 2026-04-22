@@ -42,13 +42,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        // Autoriser toutes les origines pour Render (par défaut "*")
-        // Peut être configuré via la variable d'environnement CORS_ALLOWED_ORIGINS
-        if ("*".equals(allowedOrigins)) {
-            config.setAllowedOrigins(List.of("*"));
-        } else {
-            config.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
-        }
+        // Autoriser les origines de Render
+        config.setAllowedOrigins(Arrays.asList(
+            "https://tfj-planning-frontend.onrender.com",
+            "http://localhost:4200",
+            "http://localhost:8080"
+        ));
         config.setAllowedMethods(Arrays.asList(
             "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
         ));
@@ -56,7 +55,7 @@ public class SecurityConfig {
         config.setExposedHeaders(Arrays.asList(
             "Authorization", "Content-Disposition", "Access-Control-Allow-Origin"
         ));
-        config.setAllowCredentials(false);
+        config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
