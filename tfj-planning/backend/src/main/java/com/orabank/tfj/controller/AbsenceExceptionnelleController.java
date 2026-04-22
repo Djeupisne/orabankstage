@@ -15,7 +15,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/absences-exceptionnelles")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 @Tag(name = "Absences Exceptionnelles", description = "API de gestion des absences exceptionnelles (maladie, imprévu)")
 public class AbsenceExceptionnelleController {
     
